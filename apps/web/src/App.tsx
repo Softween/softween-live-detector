@@ -17,7 +17,7 @@ const Settings = lazy(() => import('./pages/Settings'));
 
 function PageLoader() {
   return (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex items-center justify-center min-h-screen bg-[#09090b]">
       <Spinner size="md" />
     </div>
   );

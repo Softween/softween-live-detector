@@ -9,6 +9,12 @@ import Modal from '../components/ui/Modal';
 import Spinner from '../components/ui/Spinner';
 import { StatSkeleton, ChartSkeleton } from '../components/ui/Skeleton';
 
+function formatMs(ms: number | null): string {
+  if (ms === null) return '-';
+  if (ms < 1000) return `${ms}ms`;
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
 export default function MonitorDetail() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -21,6 +27,7 @@ export default function MonitorDetail() {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [pinging, setPinging] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -68,6 +75,24 @@ export default function MonitorDetail() {
     }
   }
 
+  async function handlePing() {
+    if (!id || pinging) return;
+    setPinging(true);
+    try {
+      const check = await api.monitors.ping(id);
+      if (check.status === 'up') {
+        toast.success(t('monitor.pingSuccess', { time: check.response_time_ms }));
+      } else {
+        toast.error(t('monitor.pingFailed'));
+      }
+      loadData();
+    } catch {
+      toast.error(t('monitor.pingError'));
+    } finally {
+      setPinging(false);
+    }
+  }
+
   async function handleDelete() {
     if (!id) return;
     setDeleting(true);
@@ -103,11 +128,11 @@ export default function MonitorDetail() {
       <div>
         <div className="flex items-center justify-between mb-6">
           <div className="space-y-2">
-            <div className="h-6 w-48 bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 w-64 bg-gray-200 rounded animate-pulse" />
+            <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-4 w-64 bg-zinc-800 rounded animate-pulse" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           <StatSkeleton />
           <StatSkeleton />
           <StatSkeleton />
@@ -123,138 +148,136 @@ export default function MonitorDetail() {
     .reverse()
     .filter((c) => c.response_time_ms !== null)
     .map((c) => ({
-      time: new Date(c.checked_at + 'Z').toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date(c.checked_at + 'Z').toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
       ms: c.response_time_ms,
     }));
 
-  const statusDuration = monitor.last_checked_at
-    ? getTimeSince(monitor.last_checked_at, t)
-    : null;
+  const statusDuration = monitor.last_checked_at ? getTimeSince(monitor.last_checked_at, t) : null;
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-3">
-            <div
-              className={`w-3 h-3 rounded-full ${
-                monitor.current_status === 'up' ? 'bg-green-500' : monitor.current_status === 'down' ? 'bg-red-500' : 'bg-gray-400'
-              }`}
-            />
-            <h1 className="text-xl font-bold">{monitor.name}</h1>
-            {!monitor.is_active && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                {t('monitor.paused')}
-              </span>
-            )}
+            <div className={monitor.current_status === 'up' ? 'dot-up' : monitor.current_status === 'down' ? 'dot-down' : 'dot-unknown'} style={{ width: 10, height: 10 }} />
+            <h1 className="text-lg font-semibold text-zinc-100">{monitor.name}</h1>
+            {!monitor.is_active && <span className="badge-paused">{t('monitor.paused')}</span>}
           </div>
-          <p className="text-sm text-gray-500 mt-1">{monitor.url}</p>
-          {statusDuration && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              {t('monitor.lastCheck')} {statusDuration}
-            </p>
-          )}
+          <p className="text-sm text-zinc-500 mt-1">{monitor.url}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-zinc-600">
+            {statusDuration && <span>{t('monitor.lastCheck')} {statusDuration}</span>}
+            <span>{t('detail.method')}: {monitor.method}</span>
+            <span>{t('detail.expectedStatus')}: {monitor.expected_status}</span>
+            <span>{t('detail.timeoutLabel')}: {monitor.timeout_ms / 1000}s</span>
+          </div>
         </div>
-        <div className="flex gap-2 flex-shrink-0">
-          <button
-            onClick={handleToggle}
-            disabled={toggling}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-          >
+        <div className="flex gap-2 flex-shrink-0 flex-wrap">
+          <button onClick={handlePing} disabled={pinging} className="btn-primary text-xs">
+            {pinging ? (
+              <Spinner size="sm" />
+            ) : (
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
+              </svg>
+            )}
+            {t('monitor.ping')}
+          </button>
+          <button onClick={handleToggle} disabled={toggling} className="btn-secondary text-xs">
             {toggling ? <Spinner size="sm" /> : monitor.is_active ? t('monitor.pause') : t('monitor.resume')}
           </button>
-          <Link
-            to={`/monitors/${monitor.id}/edit`}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
-          >
+          <Link to={`/monitors/${monitor.id}/edit`} className="btn-secondary text-xs">
             {t('common.edit')}
           </Link>
-          <button
-            onClick={() => setDeleteModal(true)}
-            className="px-3 py-1.5 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
-          >
+          <button onClick={() => setDeleteModal(true)} className="btn-danger text-xs">
             {t('common.delete')}
           </button>
         </div>
       </div>
 
-      {/* Stats cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('detail.uptime')}</div>
-          <div className="text-2xl font-bold text-green-600">{stats.uptime_percentage}%</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('detail.uptime')}</div>
+          <div className="text-2xl font-semibold text-emerald-400 mt-1">{stats.uptime_percentage}%</div>
         </div>
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('detail.avgResponseTime')}</div>
-          <div className="text-2xl font-bold">{stats.avg_response_time_ms}ms</div>
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('detail.avgResponseTime')}</div>
+          <div className="text-2xl font-semibold text-zinc-100 mt-1">{formatMs(stats.avg_response_time_ms)}</div>
         </div>
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('detail.incidents')}</div>
-          <div className="text-2xl font-bold text-red-600">{stats.total_incidents}</div>
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('detail.incidents')}</div>
+          <div className="text-2xl font-semibold text-red-400 mt-1">{stats.total_incidents}</div>
         </div>
       </div>
 
-      {/* Period selector */}
       <div className="flex gap-2 mb-4">
         {(['24h', '7d', '30d'] as const).map((p) => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`px-3 py-1 text-sm rounded-lg ${
-              period === p ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200'
+            className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+              period === p
+                ? 'bg-violet-600 text-white'
+                : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700'
             }`}
           >
             {t(`detail.period${p}`)}
           </button>
         ))}
+        <span className="ml-auto text-xs text-zinc-600 self-center">{t('detail.checkInterval')}</span>
       </div>
 
-      {/* Response time chart */}
       {chartData.length > 0 && (
-        <div className="p-4 bg-white rounded-xl border border-gray-200 mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">{t('detail.responseTime')}</h3>
+        <div className="card p-4 mb-6">
+          <h3 className="text-xs font-medium text-zinc-400 mb-4">{t('detail.responseTime')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
-              <XAxis dataKey="time" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} unit="ms" />
-              <Tooltip />
-              <Line type="monotone" dataKey="ms" stroke="#3b82f6" strokeWidth={1.5} dot={false} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#71717a' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#71717a' }} unit="ms" axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{
+                  background: '#18181b',
+                  border: '1px solid #27272a',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#fafafa',
+                }}
+              />
+              <Line type="monotone" dataKey="ms" stroke="#8b5cf6" strokeWidth={1.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {/* Recent checks */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <h3 className="text-sm font-medium text-gray-700 p-4 border-b border-gray-100">
+      <div className="card">
+        <h3 className="text-xs font-medium text-zinc-400 p-4 border-b border-zinc-800">
           {t('detail.recentChecks')}
         </h3>
         {checks.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-sm">{t('detail.noChecks')}</div>
+          <div className="text-center py-8 text-zinc-600 text-sm">{t('detail.noChecks')}</div>
         ) : (
           <>
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-zinc-800/50">
               {checks.map((check) => (
                 <div key={check.id} className="flex items-center justify-between px-4 py-2.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className={`w-2 h-2 rounded-full flex-shrink-0 ${check.status === 'up' ? 'bg-green-500' : 'bg-red-500'}`} />
-                    <span className="text-sm truncate">
-                      {check.status === 'up' ? `${check.status_code} - ${check.response_time_ms}ms` : check.error_message}
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={check.status === 'up' ? 'dot-up' : 'dot-down'} />
+                    <span className="text-xs text-zinc-300 truncate tabular-nums">
+                      {check.status === 'up'
+                        ? `${check.status_code} - ${formatMs(check.response_time_ms)}`
+                        : check.error_message}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400 flex-shrink-0 ml-3">
-                    {new Date(check.checked_at + 'Z').toLocaleString('tr-TR')}
+                  <span className="text-[11px] text-zinc-600 flex-shrink-0 ml-3 tabular-nums">
+                    {new Date(check.checked_at + 'Z').toLocaleString(undefined, {
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })}
                   </span>
                 </div>
               ))}
             </div>
             {hasMore && (
-              <div className="p-3 border-t border-gray-100 text-center">
-                <button
-                  onClick={loadMoreChecks}
-                  disabled={loadingMore}
-                  className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
-                >
+              <div className="p-3 border-t border-zinc-800 text-center">
+                <button onClick={loadMoreChecks} disabled={loadingMore} className="text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50">
                   {loadingMore ? <Spinner size="sm" /> : t('detail.loadMore')}
                 </button>
               </div>

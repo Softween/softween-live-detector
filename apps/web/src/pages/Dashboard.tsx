@@ -6,20 +6,15 @@ import type { Monitor } from 'shared';
 import { api } from '../api/client';
 import { CardSkeleton } from '../components/ui/Skeleton';
 
+function StatusDot({ status }: { status: string }) {
+  const cls = status === 'up' ? 'dot-up' : status === 'down' ? 'dot-down' : 'dot-unknown';
+  return <div className={cls} />;
+}
+
 function StatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();
-  const styles = {
-    up: 'bg-green-100 text-green-800',
-    down: 'bg-red-100 text-red-800',
-    unknown: 'bg-gray-100 text-gray-800',
-  };
-  const key = status as keyof typeof styles;
-
-  return (
-    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[key] || styles.unknown}`}>
-      {t(`status.${key}`, status)}
-    </span>
-  );
+  const cls = status === 'up' ? 'badge-up' : status === 'down' ? 'badge-down' : 'badge-unknown';
+  return <span className={cls}>{t(`status.${status}`, status)}</span>;
 }
 
 type SortOption = 'name' | 'status' | 'last_checked';
@@ -85,21 +80,19 @@ export default function Dashboard() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-          <div className="h-9 w-32 bg-gray-200 rounded-lg animate-pulse" />
+          <div className="h-7 w-40 bg-zinc-800 rounded animate-pulse" />
+          <div className="h-9 w-32 bg-zinc-800 rounded-lg animate-pulse" />
         </div>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="p-4 bg-white rounded-xl border border-gray-200 animate-pulse">
-              <div className="h-4 w-16 bg-gray-200 rounded mb-2" />
-              <div className="h-7 w-10 bg-gray-200 rounded" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="card p-4 animate-pulse">
+              <div className="h-3 w-12 bg-zinc-800 rounded mb-2" />
+              <div className="h-6 w-8 bg-zinc-800 rounded" />
             </div>
           ))}
         </div>
-        <div className="grid gap-3">
-          {[0, 1, 2].map((i) => (
-            <CardSkeleton key={i} />
-          ))}
+        <div className="space-y-2">
+          {[0, 1, 2].map((i) => <CardSkeleton key={i} />)}
         </div>
       </div>
     );
@@ -107,59 +100,64 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('dashboard.up')}</div>
-          <div className="text-2xl font-bold text-green-600">{upCount}</div>
-        </div>
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('dashboard.down')}</div>
-          <div className="text-2xl font-bold text-red-600">{downCount}</div>
-        </div>
-        <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">{t('dashboard.unknown')}</div>
-          <div className="text-2xl font-bold text-gray-500">{unknownCount}</div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">{t('dashboard.title')}</h1>
-        <Link
-          to="/monitors/new"
-          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 font-medium"
-        >
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-lg font-semibold text-zinc-100">{t('dashboard.title')}</h1>
+        <Link to="/monitors/new" className="btn-primary text-xs">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
           {t('dashboard.addMonitor')}
         </Link>
       </div>
 
-      {/* Search + filter + sort */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('dashboard.totalMonitors')}</div>
+          <div className="text-xl font-semibold text-zinc-100 mt-1">{monitors.length}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('dashboard.up')}</div>
+          <div className="text-xl font-semibold text-emerald-400 mt-1">{upCount}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('dashboard.down')}</div>
+          <div className="text-xl font-semibold text-red-400 mt-1">{downCount}</div>
+        </div>
+        <div className="card p-4">
+          <div className="text-xs text-zinc-500">{t('dashboard.unknown')}</div>
+          <div className="text-xl font-semibold text-zinc-400 mt-1">{unknownCount}</div>
+        </div>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
-        <input
-          type="text"
-          placeholder={t('dashboard.searchPlaceholder')}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <div className="relative flex-1">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+          </svg>
+          <input
+            type="text"
+            placeholder={t('dashboard.searchPlaceholder')}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="input pl-9"
+          />
+        </div>
         <div className="flex gap-2">
           {(['all', 'up', 'down'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 text-sm rounded-lg ${
-                filter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200'
+              className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+                filter === f
+                  ? 'bg-violet-600 text-white'
+                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700'
               }`}
             >
               {f === 'all' ? t('dashboard.filterAll') : f === 'up' ? t('dashboard.filterUp') : t('dashboard.filterDown')}
             </button>
           ))}
         </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as SortOption)}
-          className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white"
-        >
+        <select value={sort} onChange={(e) => setSort(e.target.value as SortOption)} className="input w-auto text-xs">
           <option value="name">{t('dashboard.sortByName')}</option>
           <option value="status">{t('dashboard.sortByStatus')}</option>
           <option value="last_checked">{t('dashboard.sortByLastCheck')}</option>
@@ -167,51 +165,51 @@ export default function Dashboard() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-          <p className="text-gray-500">
-            {monitors.length === 0
-              ? t('dashboard.noMonitors')
-              : t('dashboard.noFilterMatch')}
+        <div className="card text-center py-16">
+          <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+            <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.007H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+            </svg>
+          </div>
+          <p className="text-sm text-zinc-400">
+            {monitors.length === 0 ? t('dashboard.noMonitors') : t('dashboard.noFilterMatch')}
           </p>
           {monitors.length === 0 && (
-            <Link
-              to="/monitors/new"
-              className="inline-block mt-3 text-sm text-blue-600 hover:underline"
-            >
-              {t('dashboard.addFirst')}
-            </Link>
+            <>
+              <p className="text-xs text-zinc-600 mt-1">{t('dashboard.noMonitorsDesc')}</p>
+              <Link to="/monitors/new" className="btn-primary text-xs mt-4 inline-flex">
+                {t('dashboard.addFirst')}
+              </Link>
+            </>
           )}
         </div>
       ) : (
-        <div className="grid gap-3">
+        <div className="space-y-2">
           {filtered.map((monitor) => (
             <Link
               key={monitor.id}
               to={`/monitors/${monitor.id}`}
-              className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors"
+              className="card-hover flex items-center justify-between p-4 group"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div
-                  className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                    monitor.current_status === 'up'
-                      ? 'bg-green-500'
-                      : monitor.current_status === 'down'
-                        ? 'bg-red-500'
-                        : 'bg-gray-400'
-                  }`}
-                />
+                <StatusDot status={monitor.current_status} />
                 <div className="min-w-0">
-                  <div className="font-medium text-sm truncate">{monitor.name}</div>
-                  <div className="text-xs text-gray-500 truncate">{monitor.url}</div>
+                  <div className="text-sm font-medium text-zinc-200 truncate group-hover:text-zinc-100">
+                    {monitor.name}
+                  </div>
+                  <div className="text-xs text-zinc-600 truncate">{monitor.url}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-3">
                 <StatusBadge status={monitor.current_status} />
                 {monitor.last_checked_at && (
-                  <span className="text-xs text-gray-400 hidden sm:inline">
-                    {new Date(monitor.last_checked_at + 'Z').toLocaleTimeString('tr-TR')}
+                  <span className="text-[11px] text-zinc-600 hidden sm:inline tabular-nums">
+                    {new Date(monitor.last_checked_at + 'Z').toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
+                <svg className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                </svg>
               </div>
             </Link>
           ))}

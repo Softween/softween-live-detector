@@ -2,20 +2,19 @@ import { useTranslation } from 'react-i18next';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const current = i18n.language;
 
   function toggle() {
-    const next = i18n.language === 'tr' ? 'en' : 'tr';
+    const next = current === 'tr' ? 'en' : 'tr';
     i18n.changeLanguage(next);
-    localStorage.setItem('lang', next);
   }
 
   return (
     <button
       onClick={toggle}
-      className="px-2 py-1 text-xs font-medium border border-gray-200 rounded-md hover:bg-gray-50 uppercase"
-      title={i18n.language === 'tr' ? 'Switch to English' : 'Türkçeye geç'}
+      className="px-2 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-300 bg-zinc-800/50 border border-zinc-800 rounded-md transition-colors"
     >
-      {i18n.language === 'tr' ? 'EN' : 'TR'}
+      {current === 'tr' ? 'EN' : 'TR'}
     </button>
   );
 }

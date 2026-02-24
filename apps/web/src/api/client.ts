@@ -63,6 +63,7 @@ export const api = {
     delete: (id: string) => request<{ success: boolean }>(`/api/monitors/${id}`, { method: 'DELETE' }),
     pause: (id: string) => request<Monitor>(`/api/monitors/${id}/pause`, { method: 'POST' }),
     resume: (id: string) => request<Monitor>(`/api/monitors/${id}/resume`, { method: 'POST' }),
+    ping: (id: string) => request<Check>(`/api/monitors/${id}/ping`, { method: 'POST' }),
   },
   checks: {
     history: (monitorId: string, page = 1, limit = 50) =>

@@ -16,9 +16,15 @@ createRoot(document.getElementById('root')!).render(
           position="top-right"
           toastOptions={{
             duration: 3000,
-            style: { fontSize: '14px' },
-            success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-            error: { duration: 4000 },
+            style: {
+              fontSize: '13px',
+              background: '#18181b',
+              color: '#fafafa',
+              border: '1px solid #27272a',
+              borderRadius: '8px',
+            },
+            success: { iconTheme: { primary: '#10b981', secondary: '#18181b' } },
+            error: { iconTheme: { primary: '#ef4444', secondary: '#18181b' }, duration: 4000 },
           }}
         />
       </AuthProvider>

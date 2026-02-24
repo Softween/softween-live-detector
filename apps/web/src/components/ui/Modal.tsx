@@ -9,7 +9,7 @@ interface ModalProps {
   title: string;
   description?: string;
   confirmText?: string;
-  confirmVariant?: 'danger' | 'primary';
+  confirmVariant?: 'primary' | 'danger';
 }
 
 export default function Modal({
@@ -22,78 +22,47 @@ export default function Modal({
   confirmVariant = 'primary',
 }: ModalProps) {
   const { t } = useTranslation();
-  const confirmRef = useRef<HTMLButtonElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (open) {
-      previousFocusRef.current = document.activeElement as HTMLElement;
-      confirmRef.current?.focus();
-    } else {
-      previousFocusRef.current?.focus();
-    }
+    if (open) cancelRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
     if (!open) return;
-
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
     }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [open, onClose]);
 
   if (!open) return null;
 
-  const confirmClasses =
+  const confirmStyles =
     confirmVariant === 'danger'
-      ? 'bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500'
-      : 'bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-500';
+      ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'
+      : 'bg-violet-600 text-white hover:bg-violet-500';
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-      aria-describedby={description ? 'modal-description' : undefined}
-    >
-      {/* Overlay */}
-      <div
-        className="fixed inset-0 bg-black/40 transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Panel */}
-      <div className="relative z-10 w-full max-w-md mx-4 rounded-lg bg-white shadow-xl p-6 animate-in fade-in zoom-in-95 duration-200">
-        <h2 id="modal-title" className="text-lg font-semibold text-gray-900">
-          {title}
-        </h2>
-
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl p-6 animate-slide-up">
+        <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
         {description && (
-          <p id="modal-description" className="mt-2 text-sm text-gray-600 leading-relaxed">
-            {description}
-          </p>
+          <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{description}</p>
         )}
-
-        <div className="mt-6 flex items-center justify-end gap-3">
+        <div className="flex justify-end gap-2 mt-6">
           <button
-            type="button"
+            ref={cancelRef}
             onClick={onClose}
-            className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
+            className="px-4 py-2 text-sm text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-750 transition-colors"
           >
             {t('modal.cancel')}
           </button>
           <button
-            ref={confirmRef}
-            type="button"
             onClick={onConfirm}
-            className={`rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClasses}`}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${confirmStyles}`}
           >
             {confirmText || t('common.confirm')}
           </button>
