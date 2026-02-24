@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import toast from 'react-hot-toast';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../api/client';
 
@@ -8,9 +9,7 @@ export default function Settings() {
   const { user } = useAuth();
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [cooldown, setCooldown] = useState('15');
-  const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     api.auth.getNotifications().then((settings) => {
@@ -21,13 +20,11 @@ export default function Settings() {
 
   async function handleSave() {
     setLoading(true);
-    setSaved(false);
-    setError('');
     try {
       await api.auth.updateNotifications({ email_enabled: emailEnabled, cooldown_minutes: cooldown });
-      setSaved(true);
+      toast.success(t('settings.saveSuccess'));
     } catch {
-      setError(t('settings.saveError'));
+      toast.error(t('settings.saveError'));
     } finally {
       setLoading(false);
     }
@@ -83,8 +80,6 @@ export default function Settings() {
             {loading ? t('common.saving') : t('common.save')}
           </button>
 
-          {saved && <p className="text-sm text-green-600">{t('settings.saveSuccess')}</p>}
-          {error && <p className="text-sm text-red-600">{error}</p>}
         </div>
       </div>
     </div>

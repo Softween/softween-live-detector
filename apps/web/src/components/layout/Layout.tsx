@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
@@ -7,13 +7,12 @@ import LanguageSwitcher from '../ui/LanguageSwitcher';
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   async function handleLogout() {
     await logout();
-    navigate('/');
+    window.location.href = '/';
   }
 
   function isActive(path: string) {

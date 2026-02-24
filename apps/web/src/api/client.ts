@@ -1,4 +1,5 @@
 import type { Monitor, MonitorStats, Check, PaginatedResponse } from 'shared';
+import i18n from '../i18n';
 
 class ApiError extends Error {
   constructor(
@@ -22,8 +23,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
 
   if (!response.ok) {
-    const data = await response.json().catch(() => ({ error: 'Bir hata oluştu' }));
-    throw new ApiError(response.status, data.error || 'Bir hata oluştu');
+    const fallback = i18n.t('common.error');
+    const data = await response.json().catch(() => ({ error: fallback }));
+    throw new ApiError(response.status, data.error || fallback);
   }
 
   return response.json();
