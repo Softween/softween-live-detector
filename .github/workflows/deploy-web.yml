@@ -5,6 +5,7 @@ on:
     paths:
       - 'apps/web/**'
       - 'packages/shared/**'
+      - '.github/workflows/deploy-web.yml'
 
 jobs:
   deploy:
