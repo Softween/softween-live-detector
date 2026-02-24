@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import i18n from '../../i18n';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -39,6 +40,8 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         return this.props.fallback;
       }
 
+      const t = i18n.t.bind(i18n);
+
       return (
         <div
           role="alert"
@@ -62,9 +65,9 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">Bir hata olustu</h2>
+            <h2 className="text-lg font-semibold text-gray-900">{t('error.title')}</h2>
             <p className="mt-1 text-sm text-gray-600">
-              Beklenmeyen bir hata meydana geldi. Lutfen sayfayi yenileyin.
+              {t('error.description')}
             </p>
           </div>
 
@@ -80,14 +83,14 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               onClick={this.handleReset}
               className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
-              Tekrar Dene
+              {t('error.retry')}
             </button>
             <button
               type="button"
               onClick={this.handleRefresh}
               className="rounded-md px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
             >
-              Sayfayi Yenile
+              {t('error.refresh')}
             </button>
           </div>
         </div>

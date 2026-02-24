@@ -1,22 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import type { Monitor } from 'shared';
 import { api } from '../api/client';
 import { CardSkeleton } from '../components/ui/Skeleton';
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const styles = {
     up: 'bg-green-100 text-green-800',
     down: 'bg-red-100 text-red-800',
     unknown: 'bg-gray-100 text-gray-800',
   };
-  const labels = { up: 'Aktif', down: 'Down', unknown: 'Bilinmiyor' };
   const key = status as keyof typeof styles;
 
   return (
     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${styles[key] || styles.unknown}`}>
-      {labels[key] || status}
+      {t(`status.${key}`, status)}
     </span>
   );
 }
@@ -24,6 +25,7 @@ function StatusBadge({ status }: { status: string }) {
 type SortOption = 'name' | 'status' | 'last_checked';
 
 export default function Dashboard() {
+  const { t } = useTranslation();
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'up' | 'down'>('all');
@@ -41,7 +43,7 @@ export default function Dashboard() {
       const data = await api.monitors.list();
       setMonitors(data);
     } catch {
-      toast.error('Monitörler yüklenemedi');
+      toast.error(t('dashboard.loadError'));
     } finally {
       setLoading(false);
     }
@@ -108,26 +110,26 @@ export default function Dashboard() {
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Aktif</div>
+          <div className="text-sm text-gray-500">{t('dashboard.up')}</div>
           <div className="text-2xl font-bold text-green-600">{upCount}</div>
         </div>
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Down</div>
+          <div className="text-sm text-gray-500">{t('dashboard.down')}</div>
           <div className="text-2xl font-bold text-red-600">{downCount}</div>
         </div>
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Bilinmiyor</div>
+          <div className="text-sm text-gray-500">{t('dashboard.unknown')}</div>
           <div className="text-2xl font-bold text-gray-500">{unknownCount}</div>
         </div>
       </div>
 
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">Monitörler</h1>
+        <h1 className="text-xl font-bold">{t('dashboard.title')}</h1>
         <Link
           to="/monitors/new"
           className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 font-medium"
         >
-          + Monitör Ekle
+          {t('dashboard.addMonitor')}
         </Link>
       </div>
 
@@ -135,7 +137,7 @@ export default function Dashboard() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <input
           type="text"
-          placeholder="Ara (isim veya URL)..."
+          placeholder={t('dashboard.searchPlaceholder')}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -149,7 +151,7 @@ export default function Dashboard() {
                 filter === f ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200'
               }`}
             >
-              {f === 'all' ? 'Tümü' : f === 'up' ? 'Aktif' : 'Down'}
+              {f === 'all' ? t('dashboard.filterAll') : f === 'up' ? t('dashboard.filterUp') : t('dashboard.filterDown')}
             </button>
           ))}
         </div>
@@ -158,9 +160,9 @@ export default function Dashboard() {
           onChange={(e) => setSort(e.target.value as SortOption)}
           className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white"
         >
-          <option value="name">Ada Göre</option>
-          <option value="status">Duruma Göre</option>
-          <option value="last_checked">Son Kontrol</option>
+          <option value="name">{t('dashboard.sortByName')}</option>
+          <option value="status">{t('dashboard.sortByStatus')}</option>
+          <option value="last_checked">{t('dashboard.sortByLastCheck')}</option>
         </select>
       </div>
 
@@ -168,15 +170,15 @@ export default function Dashboard() {
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <p className="text-gray-500">
             {monitors.length === 0
-              ? 'Henüz monitör eklenmemiş.'
-              : 'Bu filtreye uygun monitör yok.'}
+              ? t('dashboard.noMonitors')
+              : t('dashboard.noFilterMatch')}
           </p>
           {monitors.length === 0 && (
             <Link
               to="/monitors/new"
               className="inline-block mt-3 text-sm text-blue-600 hover:underline"
             >
-              İlk monitörünüzü ekleyin
+              {t('dashboard.addFirst')}
             </Link>
           )}
         </div>

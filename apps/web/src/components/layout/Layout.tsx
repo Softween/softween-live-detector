@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
+import LanguageSwitcher from '../ui/LanguageSwitcher';
 
 export default function Layout() {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +25,7 @@ export default function Layout() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/dashboard" className="text-lg font-semibold text-gray-900">
-            Live Checker
+            {t('common.appName')}
           </Link>
 
           {/* Desktop nav */}
@@ -31,20 +34,21 @@ export default function Layout() {
               to="/dashboard"
               className={`text-sm ${isActive('/dashboard') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
             >
-              Dashboard
+              {t('nav.dashboard')}
             </Link>
             <Link
               to="/settings"
               className={`text-sm ${isActive('/settings') ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
             >
-              Ayarlar
+              {t('nav.settings')}
             </Link>
+            <LanguageSwitcher />
             <span className="text-sm text-gray-400">{user?.name}</span>
             <button
               onClick={handleLogout}
               className="text-sm text-red-600 hover:text-red-800"
             >
-              Çıkış
+              {t('nav.logout')}
             </button>
           </nav>
 
@@ -52,7 +56,7 @@ export default function Layout() {
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="sm:hidden p-1.5 rounded-md hover:bg-gray-100"
-            aria-label="Menü"
+            aria-label={t('nav.menu')}
           >
             <svg className="w-5 h-5 text-gray-700" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               {mobileMenuOpen ? (
@@ -75,7 +79,7 @@ export default function Layout() {
                   isActive('/dashboard') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Dashboard
+                {t('nav.dashboard')}
               </Link>
               <Link
                 to="/settings"
@@ -84,16 +88,19 @@ export default function Layout() {
                   isActive('/settings') ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                Ayarlar
+                {t('nav.settings')}
               </Link>
               <div className="border-t border-gray-100 pt-2 mt-2 flex items-center justify-between px-3">
                 <span className="text-sm text-gray-500">{user?.name}</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-red-600 hover:text-red-800"
-                >
-                  Çıkış
-                </button>
+                <div className="flex items-center gap-3">
+                  <LanguageSwitcher />
+                  <button
+                    onClick={handleLogout}
+                    className="text-sm text-red-600 hover:text-red-800"
+                  >
+                    {t('nav.logout')}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

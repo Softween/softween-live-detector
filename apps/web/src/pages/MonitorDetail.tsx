@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import type { Monitor, MonitorStats, Check } from 'shared';
 import { api } from '../api/client';
@@ -9,6 +10,7 @@ import Spinner from '../components/ui/Spinner';
 import { StatSkeleton, ChartSkeleton } from '../components/ui/Skeleton';
 
 export default function MonitorDetail() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [monitor, setMonitor] = useState<Monitor | null>(null);
@@ -43,7 +45,7 @@ export default function MonitorDetail() {
       setChecks(checksData.data);
       setHasMore(checksData.data.length === 50);
     } catch {
-      toast.error('Monitör bulunamadı');
+      toast.error(t('monitor.notFound'));
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -60,7 +62,7 @@ export default function MonitorDetail() {
       setPage(nextPage);
       setHasMore(checksData.data.length === 50);
     } catch {
-      toast.error('Daha fazla kontrol yüklenemedi');
+      toast.error(t('monitor.loadMoreError'));
     } finally {
       setLoadingMore(false);
     }
@@ -71,10 +73,10 @@ export default function MonitorDetail() {
     setDeleting(true);
     try {
       await api.monitors.delete(id);
-      toast.success('Monitör silindi');
+      toast.success(t('monitor.deleteSuccess'));
       navigate('/dashboard');
     } catch {
-      toast.error('Monitör silinemedi');
+      toast.error(t('monitor.deleteError'));
       setDeleting(false);
       setDeleteModal(false);
     }
@@ -88,9 +90,9 @@ export default function MonitorDetail() {
         ? await api.monitors.pause(id)
         : await api.monitors.resume(id);
       setMonitor(updated);
-      toast.success(updated.is_active ? 'İzleme devam ediyor' : 'İzleme duraklatıldı');
+      toast.success(updated.is_active ? t('monitor.resumeSuccess') : t('monitor.pauseSuccess'));
     } catch {
-      toast.error('İşlem başarısız');
+      toast.error(t('monitor.toggleError'));
     } finally {
       setToggling(false);
     }
@@ -126,7 +128,7 @@ export default function MonitorDetail() {
     }));
 
   const statusDuration = monitor.last_checked_at
-    ? getTimeSince(monitor.last_checked_at)
+    ? getTimeSince(monitor.last_checked_at, t)
     : null;
 
   return (
@@ -142,14 +144,14 @@ export default function MonitorDetail() {
             <h1 className="text-xl font-bold">{monitor.name}</h1>
             {!monitor.is_active && (
               <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                Duraklatıldı
+                {t('monitor.paused')}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 mt-1">{monitor.url}</p>
           {statusDuration && (
             <p className="text-xs text-gray-400 mt-0.5">
-              Son kontrol: {statusDuration}
+              {t('monitor.lastCheck')} {statusDuration}
             </p>
           )}
         </div>
@@ -159,19 +161,19 @@ export default function MonitorDetail() {
             disabled={toggling}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
           >
-            {toggling ? <Spinner size="sm" /> : monitor.is_active ? 'Duraklat' : 'Devam Et'}
+            {toggling ? <Spinner size="sm" /> : monitor.is_active ? t('monitor.pause') : t('monitor.resume')}
           </button>
           <Link
             to={`/monitors/${monitor.id}/edit`}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50"
           >
-            Düzenle
+            {t('common.edit')}
           </Link>
           <button
             onClick={() => setDeleteModal(true)}
             className="px-3 py-1.5 text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50"
           >
-            Sil
+            {t('common.delete')}
           </button>
         </div>
       </div>
@@ -179,15 +181,15 @@ export default function MonitorDetail() {
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Uptime</div>
+          <div className="text-sm text-gray-500">{t('detail.uptime')}</div>
           <div className="text-2xl font-bold text-green-600">{stats.uptime_percentage}%</div>
         </div>
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Ort. Yanıt Süresi</div>
+          <div className="text-sm text-gray-500">{t('detail.avgResponseTime')}</div>
           <div className="text-2xl font-bold">{stats.avg_response_time_ms}ms</div>
         </div>
         <div className="p-4 bg-white rounded-xl border border-gray-200">
-          <div className="text-sm text-gray-500">Kesintiler</div>
+          <div className="text-sm text-gray-500">{t('detail.incidents')}</div>
           <div className="text-2xl font-bold text-red-600">{stats.total_incidents}</div>
         </div>
       </div>
@@ -202,7 +204,7 @@ export default function MonitorDetail() {
               period === p ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 border border-gray-200'
             }`}
           >
-            {p === '24h' ? '24 Saat' : p === '7d' ? '7 Gün' : '30 Gün'}
+            {t(`detail.period${p}`)}
           </button>
         ))}
       </div>
@@ -210,7 +212,7 @@ export default function MonitorDetail() {
       {/* Response time chart */}
       {chartData.length > 0 && (
         <div className="p-4 bg-white rounded-xl border border-gray-200 mb-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Yanıt Süresi</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">{t('detail.responseTime')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
               <XAxis dataKey="time" tick={{ fontSize: 11 }} />
@@ -225,10 +227,10 @@ export default function MonitorDetail() {
       {/* Recent checks */}
       <div className="bg-white rounded-xl border border-gray-200">
         <h3 className="text-sm font-medium text-gray-700 p-4 border-b border-gray-100">
-          Son Kontroller
+          {t('detail.recentChecks')}
         </h3>
         {checks.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 text-sm">Henüz kontrol yapılmamış</div>
+          <div className="text-center py-8 text-gray-400 text-sm">{t('detail.noChecks')}</div>
         ) : (
           <>
             <div className="divide-y divide-gray-50">
@@ -253,7 +255,7 @@ export default function MonitorDetail() {
                   disabled={loadingMore}
                   className="text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
                 >
-                  {loadingMore ? <Spinner size="sm" /> : 'Daha fazla yükle'}
+                  {loadingMore ? <Spinner size="sm" /> : t('detail.loadMore')}
                 </button>
               </div>
             )}
@@ -265,22 +267,22 @@ export default function MonitorDetail() {
         open={deleteModal}
         onClose={() => setDeleteModal(false)}
         onConfirm={handleDelete}
-        title="Monitörü Sil"
-        description={`"${monitor.name}" monitörünü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.`}
-        confirmText={deleting ? 'Siliniyor...' : 'Sil'}
+        title={t('monitor.deleteTitle')}
+        description={t('monitor.deleteConfirm', { name: monitor.name })}
+        confirmText={deleting ? t('common.deleting') : t('common.delete')}
         confirmVariant="danger"
       />
     </div>
   );
 }
 
-function getTimeSince(dateStr: string): string {
+function getTimeSince(dateStr: string, t: (key: string, options?: Record<string, unknown>) => string): string {
   const diff = Date.now() - new Date(dateStr + 'Z').getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'Az önce';
-  if (minutes < 60) return `${minutes} dk önce`;
+  if (minutes < 1) return t('time.justNow');
+  if (minutes < 60) return t('time.minutesAgo', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} saat önce`;
+  if (hours < 24) return t('time.hoursAgo', { count: hours });
   const days = Math.floor(hours / 24);
-  return `${days} gün önce`;
+  return t('time.daysAgo', { count: days });
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 interface ModalProps {
   open: boolean;
@@ -17,9 +18,10 @@ export default function Modal({
   onConfirm,
   title,
   description,
-  confirmText = 'Onayla',
+  confirmText,
   confirmVariant = 'primary',
 }: ModalProps) {
+  const { t } = useTranslation();
   const confirmRef = useRef<HTMLButtonElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -85,7 +87,7 @@ export default function Modal({
             onClick={onClose}
             className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
           >
-            Vazgec
+            {t('modal.cancel')}
           </button>
           <button
             ref={confirmRef}
@@ -93,7 +95,7 @@ export default function Modal({
             onClick={onConfirm}
             className={`rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${confirmClasses}`}
           >
-            {confirmText}
+            {confirmText || t('common.confirm')}
           </button>
         </div>
       </div>

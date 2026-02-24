@@ -1,16 +1,19 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function NotFound() {
+  const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 text-center">
       <p className="text-7xl font-bold text-gray-200">404</p>
 
       <h1 className="mt-4 text-2xl font-semibold text-gray-900">
-        Sayfa Bulunamadi
+        {t('notFound.title')}
       </h1>
 
       <p className="mt-2 text-sm text-gray-600 max-w-md">
-        Aradiginiz sayfa mevcut degil veya tasinmis olabilir.
+        {t('notFound.description')}
       </p>
 
       <Link
@@ -27,7 +30,7 @@ export default function NotFound() {
         >
           <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
         </svg>
-        Dashboard'a Don
+        {t('notFound.backToDashboard')}
       </Link>
     </div>
   );
