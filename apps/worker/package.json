@@ -1,0 +1,23 @@
+{
+  "name": "worker",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "db:migrate:local": "wrangler d1 migrations apply live-checker-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply live-checker-db --remote"
+  },
+  "dependencies": {
+    "hono": "^4.6.0",
+    "shared": "workspace:*",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241106.0",
+    "typescript": "^5.5.0",
+    "wrangler": "^3.91.0"
+  }
+}

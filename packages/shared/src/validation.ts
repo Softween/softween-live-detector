@@ -1,0 +1,39 @@
+import { z } from 'zod';
+
+export const registerSchema = z.object({
+  email: z.string().email('Geçerli bir email adresi girin').max(255),
+  password: z.string().min(8, 'Şifre en az 8 karakter olmalı').max(128),
+  name: z.string().min(1, 'İsim gerekli').max(100),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
+
+export const createMonitorSchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(100),
+  url: z.string().url('Geçerli bir URL girin').max(2000),
+  method: z.enum(['GET', 'HEAD']).optional().default('GET'),
+  expected_status: z.number().int().min(100).max(599).optional().default(200),
+  timeout_ms: z.number().int().min(1000).max(30000).optional().default(10000),
+});
+
+export const updateMonitorSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  url: z.string().url().max(2000).optional(),
+  method: z.enum(['GET', 'HEAD']).optional(),
+  expected_status: z.number().int().min(100).max(599).optional(),
+  timeout_ms: z.number().int().min(1000).max(30000).optional(),
+});
+
+export const updateNotificationSettingsSchema = z.object({
+  email_enabled: z.boolean(),
+  cooldown_minutes: z.enum(['5', '15', '30', '60']).transform(Number),
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type CreateMonitorInput = z.infer<typeof createMonitorSchema>;
+export type UpdateMonitorInput = z.infer<typeof updateMonitorSchema>;
+export type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>;

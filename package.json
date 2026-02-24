@@ -1,0 +1,17 @@
+{
+  "private": true,
+  "scripts": {
+    "dev:worker": "pnpm --filter worker dev",
+    "dev:web": "pnpm --filter web dev",
+    "build:shared": "pnpm --filter shared build",
+    "build:web": "pnpm --filter web build",
+    "deploy:worker": "pnpm --filter worker deploy",
+    "deploy:web": "pnpm --filter web deploy",
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate:local": "pnpm --filter worker db:migrate:local",
+    "db:migrate:remote": "pnpm --filter worker db:migrate:remote"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

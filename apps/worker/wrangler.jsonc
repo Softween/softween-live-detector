@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "softween-live-checker-api",
+  "main": "src/index.ts",
+  "workers_dev": true,
+  "compatibility_date": "2026-02-08",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "live-checker-db",
+      "database_id": "16d0034b-d0e9-4b4c-b0f7-d317cc7c7101"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "22e3e8b5303f407580ff9ede865054ae"
+    }
+  ],
+  "vars": {
+    "ENVIRONMENT": "production",
+    "FRONTEND_URL": "https://softween-live-checker-8os.pages.dev"
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  }
+}

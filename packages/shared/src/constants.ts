@@ -1,0 +1,8 @@
+export const MAX_MONITORS_PER_USER = 10;
+export const DEFAULT_CHECK_INTERVAL_SECONDS = 300;
+export const DEFAULT_TIMEOUT_MS = 10000;
+export const DEFAULT_COOLDOWN_MINUTES = 15;
+export const DATA_RETENTION_DAYS = 30;
+export const NOTIFICATION_LOG_RETENTION_DAYS = 90;
+export const CRON_BATCH_SIZE = 25;
+export const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
