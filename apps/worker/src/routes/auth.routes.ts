@@ -1,6 +1,8 @@
 import { Hono } from 'hono';
 import { registerSchema, loginSchema, updateNotificationSettingsSchema } from 'shared';
 import { registerUser, loginUser, getUserById } from '../services/auth.service';
+import { createMonitor } from '../services/monitor.service';
+import { pingMonitor } from '../services/ping.service';
 import { signJWT } from '../lib/jwt';
 import { authMiddleware, setAuthCookie, clearAuthCookie } from '../middleware/auth';
 import { rateLimiter } from '../middleware/rate-limit';
@@ -29,6 +31,36 @@ auth.post('/register', async (c) => {
     const user = await registerUser(c.env, parsed.data.email, parsed.data.password, parsed.data.name);
     const token = await signJWT({ sub: user.id, email: user.email }, c.env.JWT_SECRET);
     const isProduction = c.env.ENVIRONMENT === 'production';
+
+    // Create a sample monitor so new users see how it works
+    c.executionCtx.waitUntil(
+      (async () => {
+        try {
+          const sample = await createMonitor(c.env, user.id, {
+            name: 'Tesla (Sample)',
+            url: 'https://www.tesla.com',
+            method: 'GET',
+            expected_status: 200,
+            timeout_ms: 10000,
+          });
+          // Trigger first ping
+          const result = await pingMonitor({
+            id: sample.id,
+            url: sample.url,
+            method: sample.method,
+            expected_status: sample.expected_status,
+            timeout_ms: sample.timeout_ms,
+            current_status: sample.current_status,
+          });
+          await c.env.DB.prepare(
+            `INSERT INTO checks (id, monitor_id, status, status_code, response_time_ms, error_message) VALUES (?, ?, ?, ?, ?, ?)`,
+          ).bind(result.id, result.monitorId, result.status, result.statusCode, result.responseTime, result.error).run();
+          await c.env.DB.prepare(
+            "UPDATE monitors SET current_status = ?, last_checked_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+          ).bind(result.status, result.monitorId).run();
+        } catch { /* sample monitor is best-effort */ }
+      })(),
+    );
 
     c.header('Set-Cookie', setAuthCookie(token, isProduction));
     return c.json({ id: user.id, email: user.email, name: user.name }, 201);
