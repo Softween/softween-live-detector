@@ -12,7 +12,7 @@ export default function LanguageSwitcher() {
   return (
     <button
       onClick={toggle}
-      className="px-2 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-300 bg-zinc-800/50 border border-zinc-800 rounded-md transition-colors"
+      className="px-2 py-1 text-xs font-medium text-zinc-500 hover:text-zinc-300 bg-white/[0.04] border border-white/[0.06] rounded-md transition-colors"
     >
       {current === 'tr' ? 'EN' : 'TR'}
     </button>

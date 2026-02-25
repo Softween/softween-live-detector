@@ -46,8 +46,8 @@ export default function Modal({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm bg-zinc-900 border border-zinc-800 rounded-xl p-6 animate-slide-up">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-sm bg-[#0c0c0e] border border-white/[0.08] rounded-xl p-6 shadow-2xl animate-slide-up">
         <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
         {description && (
           <p className="mt-2 text-sm text-zinc-400 leading-relaxed">{description}</p>
@@ -56,7 +56,7 @@ export default function Modal({
           <button
             ref={cancelRef}
             onClick={onClose}
-            className="px-4 py-2 text-sm text-zinc-400 bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-750 transition-colors"
+            className="px-4 py-2 text-sm text-zinc-400 bg-white/[0.04] border border-white/[0.08] rounded-lg hover:bg-white/[0.08] transition-colors"
           >
             {t('modal.cancel')}
           </button>

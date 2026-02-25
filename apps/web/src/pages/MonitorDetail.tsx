@@ -126,13 +126,13 @@ export default function MonitorDetail() {
   if (loading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div className="space-y-2">
-            <div className="h-6 w-48 bg-zinc-800 rounded animate-pulse" />
-            <div className="h-4 w-64 bg-zinc-800 rounded animate-pulse" />
+            <div className="h-6 w-48 bg-zinc-800/60 rounded animate-pulse" />
+            <div className="h-4 w-64 bg-zinc-800/60 rounded animate-pulse" />
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
           <StatSkeleton />
           <StatSkeleton />
           <StatSkeleton />
@@ -156,15 +156,15 @@ export default function MonitorDetail() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
         <div>
           <div className="flex items-center gap-3">
             <div className={monitor.current_status === 'up' ? 'dot-up' : monitor.current_status === 'down' ? 'dot-down' : 'dot-unknown'} style={{ width: 10, height: 10 }} />
-            <h1 className="text-lg font-semibold text-zinc-100">{monitor.name}</h1>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-100">{monitor.name}</h1>
             {!monitor.is_active && <span className="badge-paused">{t('monitor.paused')}</span>}
           </div>
-          <p className="text-sm text-zinc-500 mt-1">{monitor.url}</p>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-zinc-600">
+          <p className="text-sm text-zinc-500 mt-1.5">{monitor.url}</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-xs text-zinc-600">
             {statusDuration && <span>{t('monitor.lastCheck')} {statusDuration}</span>}
             <span>{t('detail.method')}: {monitor.method}</span>
             <span>{t('detail.expectedStatus')}: {monitor.expected_status}</span>
@@ -194,52 +194,56 @@ export default function MonitorDetail() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
-        <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('detail.uptime')}</div>
-          <div className="text-2xl font-semibold text-emerald-400 mt-1">{stats.uptime_percentage}%</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <div className="card p-5">
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('detail.uptime')}</div>
+          <div className="text-2xl font-bold text-emerald-400 mt-1.5 tabular-nums">{stats.uptime_percentage}%</div>
         </div>
-        <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('detail.avgResponseTime')}</div>
-          <div className="text-2xl font-semibold text-zinc-100 mt-1">{formatMs(stats.avg_response_time_ms)}</div>
+        <div className="card p-5">
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('detail.avgResponseTime')}</div>
+          <div className="text-2xl font-bold text-zinc-100 mt-1.5 tabular-nums">{formatMs(stats.avg_response_time_ms)}</div>
         </div>
-        <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('detail.incidents')}</div>
-          <div className="text-2xl font-semibold text-red-400 mt-1">{stats.total_incidents}</div>
+        <div className="card p-5">
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('detail.incidents')}</div>
+          <div className="text-2xl font-bold text-red-400 mt-1.5 tabular-nums">{stats.total_incidents}</div>
         </div>
       </div>
 
-      <div className="flex gap-2 mb-4">
-        {(['24h', '7d', '30d'] as const).map((p) => (
-          <button
-            key={p}
-            onClick={() => setPeriod(p)}
-            className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
-              period === p
-                ? 'bg-violet-600 text-white'
-                : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700'
-            }`}
-          >
-            {t(`detail.period${p}`)}
-          </button>
-        ))}
-        <span className="ml-auto text-xs text-zinc-600 self-center">{t('detail.checkInterval')}</span>
+      <div className="flex items-center gap-3 mb-5">
+        <div className="flex rounded-lg border border-white/[0.06] bg-white/[0.02] p-0.5">
+          {(['24h', '7d', '30d'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
+                period === p
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              {t(`detail.period${p}`)}
+            </button>
+          ))}
+        </div>
+        <span className="ml-auto text-[11px] text-zinc-600">{t('detail.checkInterval')}</span>
       </div>
 
       {chartData.length > 0 && (
-        <div className="card p-4 mb-6">
-          <h3 className="text-xs font-medium text-zinc-400 mb-4">{t('detail.responseTime')}</h3>
+        <div className="card p-5 mb-6">
+          <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('detail.responseTime')}</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={chartData}>
-              <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#71717a' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#71717a' }} unit="ms" axisLine={false} tickLine={false} />
+              <XAxis dataKey="time" tick={{ fontSize: 10, fill: '#52525b' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#52525b' }} unit="ms" axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={{
-                  background: '#18181b',
-                  border: '1px solid #27272a',
-                  borderRadius: '8px',
+                  background: 'rgba(9, 9, 11, 0.95)',
+                  border: '1px solid rgba(255, 255, 255, 0.06)',
+                  borderRadius: '10px',
                   fontSize: '12px',
                   color: '#fafafa',
+                  backdropFilter: 'blur(12px)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                 }}
               />
               <Line type="monotone" dataKey="ms" stroke="#8b5cf6" strokeWidth={1.5} dot={false} />
@@ -248,17 +252,17 @@ export default function MonitorDetail() {
         </div>
       )}
 
-      <div className="card">
-        <h3 className="text-xs font-medium text-zinc-400 p-4 border-b border-zinc-800">
+      <div className="card overflow-hidden">
+        <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider p-4 border-b border-white/[0.06]">
           {t('detail.recentChecks')}
         </h3>
         {checks.length === 0 ? (
-          <div className="text-center py-8 text-zinc-600 text-sm">{t('detail.noChecks')}</div>
+          <div className="text-center py-10 text-zinc-600 text-sm">{t('detail.noChecks')}</div>
         ) : (
           <>
-            <div className="divide-y divide-zinc-800/50">
+            <div className="divide-y divide-white/[0.04]">
               {checks.map((check) => (
-                <div key={check.id} className="flex items-center justify-between px-4 py-2.5">
+                <div key={check.id} className="flex items-center justify-between px-4 py-2.5 hover:bg-white/[0.02] transition-colors">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className={check.status === 'up' ? 'dot-up' : 'dot-down'} />
                     <span className="text-xs text-zinc-300 truncate tabular-nums">
@@ -276,8 +280,8 @@ export default function MonitorDetail() {
               ))}
             </div>
             {hasMore && (
-              <div className="p-3 border-t border-zinc-800 text-center">
-                <button onClick={loadMoreChecks} disabled={loadingMore} className="text-xs text-violet-400 hover:text-violet-300 disabled:opacity-50">
+              <div className="p-3 border-t border-white/[0.06] text-center">
+                <button onClick={loadMoreChecks} disabled={loadingMore} className="text-xs text-violet-400 hover:text-violet-300 transition-colors disabled:opacity-50">
                   {loadingMore ? <Spinner size="sm" /> : t('detail.loadMore')}
                 </button>
               </div>

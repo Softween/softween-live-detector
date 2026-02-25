@@ -32,26 +32,26 @@ export default function Settings() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-lg font-semibold text-zinc-100 mb-6">{t('settings.title')}</h1>
+      <h1 className="text-xl font-bold tracking-tight text-zinc-100 mb-8">{t('settings.title')}</h1>
 
       <div className="card p-5 mb-4">
-        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('settings.accountInfo')}</h2>
+        <h2 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('settings.accountInfo')}</h2>
         <div className="space-y-3 text-sm">
           <div className="flex justify-between">
             <span className="text-zinc-500">{t('auth.name')}</span>
-            <span className="text-zinc-200">{user?.name}</span>
+            <span className="text-zinc-200 font-medium">{user?.name}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-zinc-500">{t('auth.email')}</span>
-            <span className="text-zinc-200">{user?.email}</span>
+            <span className="text-zinc-200 font-medium">{user?.email}</span>
           </div>
         </div>
       </div>
 
       <div className="card p-5">
-        <h2 className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('settings.notifications')}</h2>
+        <h2 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-5">{t('settings.notifications')}</h2>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-zinc-200">{t('settings.emailNotifications')}</div>
@@ -59,9 +59,9 @@ export default function Settings() {
             </div>
             <button
               onClick={() => setEmailEnabled(!emailEnabled)}
-              className={`relative w-10 h-5 rounded-full transition-colors ${emailEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
+              className={`relative w-10 h-5 rounded-full transition-colors duration-150 ${emailEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
             >
-              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${emailEnabled ? 'left-5' : 'left-0.5'}`} />
+              <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-150 ${emailEnabled ? 'left-5' : 'left-0.5'}`} />
             </button>
           </div>
 
@@ -73,7 +73,7 @@ export default function Settings() {
               <option value="30">{t('settings.cooldown30')}</option>
               <option value="60">{t('settings.cooldown60')}</option>
             </select>
-            <p className="text-xs text-zinc-600 mt-1">{t('settings.cooldownDesc')}</p>
+            <p className="text-xs text-zinc-600 mt-1.5">{t('settings.cooldownDesc')}</p>
           </div>
 
           <button onClick={handleSave} disabled={loading} className="btn-primary">

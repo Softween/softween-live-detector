@@ -63,7 +63,7 @@ export default function EditMonitor() {
 
   if (!monitor) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-16">
         <Spinner size="md" />
       </div>
     );
@@ -71,10 +71,10 @@ export default function EditMonitor() {
 
   return (
     <div className="max-w-lg">
-      <h1 className="text-lg font-semibold text-zinc-100 mb-6">{t('monitor.editTitle')}</h1>
+      <h1 className="text-xl font-bold tracking-tight text-zinc-100 mb-8">{t('monitor.editTitle')}</h1>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg">
+        <div className="mb-5 p-3 bg-red-500/10 border border-red-500/15 text-red-400 text-sm rounded-lg">
           {error}
         </div>
       )}
@@ -117,9 +117,9 @@ export default function EditMonitor() {
               </option>
             ))}
           </select>
-          <p className="text-xs text-zinc-600 mt-1">{t('monitor.timeoutHint')}</p>
+          <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.timeoutHint')}</p>
         </div>
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-3">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? t('common.saving') : t('common.save')}
           </button>

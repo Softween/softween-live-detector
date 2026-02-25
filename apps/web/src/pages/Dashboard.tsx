@@ -79,15 +79,15 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
-          <div className="h-7 w-40 bg-zinc-800 rounded animate-pulse" />
-          <div className="h-9 w-32 bg-zinc-800 rounded-lg animate-pulse" />
+        <div className="flex items-center justify-between mb-8">
+          <div className="h-7 w-40 bg-zinc-800/60 rounded animate-pulse" />
+          <div className="h-9 w-32 bg-zinc-800/60 rounded-lg animate-pulse" />
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className="card p-4 animate-pulse">
-              <div className="h-3 w-12 bg-zinc-800 rounded mb-2" />
-              <div className="h-6 w-8 bg-zinc-800 rounded" />
+              <div className="h-3 w-12 bg-zinc-800/60 rounded mb-2" />
+              <div className="h-6 w-8 bg-zinc-800/60 rounded" />
             </div>
           ))}
         </div>
@@ -100,8 +100,8 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold text-zinc-100">{t('dashboard.title')}</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-xl font-bold tracking-tight text-zinc-100">{t('dashboard.title')}</h1>
         <Link to="/monitors/new" className="btn-primary text-xs">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -110,28 +110,28 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
         <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('dashboard.totalMonitors')}</div>
-          <div className="text-xl font-semibold text-zinc-100 mt-1">{monitors.length}</div>
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('dashboard.totalMonitors')}</div>
+          <div className="text-2xl font-bold text-zinc-100 mt-1.5 tabular-nums">{monitors.length}</div>
         </div>
         <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('dashboard.up')}</div>
-          <div className="text-xl font-semibold text-emerald-400 mt-1">{upCount}</div>
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('dashboard.up')}</div>
+          <div className="text-2xl font-bold text-emerald-400 mt-1.5 tabular-nums">{upCount}</div>
         </div>
         <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('dashboard.down')}</div>
-          <div className="text-xl font-semibold text-red-400 mt-1">{downCount}</div>
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('dashboard.down')}</div>
+          <div className="text-2xl font-bold text-red-400 mt-1.5 tabular-nums">{downCount}</div>
         </div>
         <div className="card p-4">
-          <div className="text-xs text-zinc-500">{t('dashboard.unknown')}</div>
-          <div className="text-xl font-semibold text-zinc-400 mt-1">{unknownCount}</div>
+          <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('dashboard.unknown')}</div>
+          <div className="text-2xl font-bold text-zinc-400 mt-1.5 tabular-nums">{unknownCount}</div>
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mb-4">
+      <div className="flex flex-col sm:flex-row gap-3 mb-5">
         <div className="relative flex-1">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
           </svg>
           <input
@@ -139,18 +139,18 @@ export default function Dashboard() {
             placeholder={t('dashboard.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="input pl-9"
+            className="input pl-10"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex rounded-lg border border-white/[0.06] bg-white/[0.02] p-0.5">
           {(['all', 'up', 'down'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-3 py-2 text-xs rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all duration-150 ${
                 filter === f
-                  ? 'bg-violet-600 text-white'
-                  : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700'
+                  ? 'bg-white text-zinc-900 shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
               {f === 'all' ? t('dashboard.filterAll') : f === 'up' ? t('dashboard.filterUp') : t('dashboard.filterDown')}
@@ -165,8 +165,8 @@ export default function Dashboard() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="card text-center py-16">
-          <div className="w-12 h-12 rounded-xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
+        <div className="card text-center py-20">
+          <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center mx-auto mb-4">
             <svg className="w-6 h-6 text-zinc-500" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.348 14.651a3.75 3.75 0 010-5.303m5.304 0a3.75 3.75 0 010 5.303m-7.425 2.122a6.75 6.75 0 010-9.546m9.546 0a6.75 6.75 0 010 9.546M5.106 18.894c-3.808-3.808-3.808-9.98 0-13.789m13.788 0c3.808 3.808 3.808 9.981 0 13.79M12 12h.008v.007H12V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
             </svg>
@@ -176,15 +176,15 @@ export default function Dashboard() {
           </p>
           {monitors.length === 0 && (
             <>
-              <p className="text-xs text-zinc-600 mt-1">{t('dashboard.noMonitorsDesc')}</p>
-              <Link to="/monitors/new" className="btn-primary text-xs mt-4 inline-flex">
+              <p className="text-xs text-zinc-600 mt-1.5">{t('dashboard.noMonitorsDesc')}</p>
+              <Link to="/monitors/new" className="btn-primary text-xs mt-5 inline-flex">
                 {t('dashboard.addFirst')}
               </Link>
             </>
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {filtered.map((monitor) => (
             <Link
               key={monitor.id}
@@ -194,7 +194,7 @@ export default function Dashboard() {
               <div className="flex items-center gap-3 min-w-0">
                 <StatusDot status={monitor.current_status} />
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-zinc-200 truncate group-hover:text-zinc-100">
+                  <div className="text-sm font-medium text-zinc-200 truncate group-hover:text-zinc-100 transition-colors">
                     {monitor.name}
                   </div>
                   <div className="text-xs text-zinc-600 truncate">{monitor.url}</div>
@@ -207,7 +207,7 @@ export default function Dashboard() {
                     {new Date(monitor.last_checked_at + 'Z').toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 )}
-                <svg className="w-4 h-4 text-zinc-700 group-hover:text-zinc-500 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <svg className="w-4 h-4 text-zinc-700 group-hover:text-zinc-400 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </div>
