@@ -5,6 +5,7 @@ import Layout from './components/layout/Layout';
 import ErrorBoundary from './components/ui/ErrorBoundary';
 import NotFound from './components/ui/NotFound';
 import Spinner from './components/ui/Spinner';
+import VisitorFooter from './components/ui/VisitorFooter';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login'));
@@ -52,6 +53,7 @@ export default function App() {
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <VisitorFooter />
       </Suspense>
     </ErrorBoundary>
   );

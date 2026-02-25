@@ -71,6 +71,10 @@ export const api = {
     stats: (monitorId: string, period: '24h' | '7d' | '30d' = '24h') =>
       request<MonitorStats>(`/api/checks/${monitorId}/stats?period=${period}`),
   },
+  visitor: {
+    increment: () => request<{ count: number }>('/api/visitor', { method: 'POST' }),
+    get: () => request<{ count: number }>('/api/visitor'),
+  },
 };
 
 export { ApiError };

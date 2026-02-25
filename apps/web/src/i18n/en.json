@@ -181,5 +181,8 @@
   },
   "modal": {
     "cancel": "Cancel"
+  },
+  "footer": {
+    "visitors": "visitors"
   }
 }
