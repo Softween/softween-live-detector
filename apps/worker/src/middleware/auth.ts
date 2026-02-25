@@ -32,14 +32,14 @@ function parseCookie(cookieHeader: string, name: string): string | null {
 
 export function setAuthCookie(token: string, isProduction: boolean): string {
   if (isProduction) {
-    return `auth_token=${token}; HttpOnly; Path=/; SameSite=Lax; Secure; Domain=.livedetector.softween.com; Max-Age=${7 * 24 * 60 * 60}`;
+    return `auth_token=${token}; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=${7 * 24 * 60 * 60}`;
   }
   return `auth_token=${token}; HttpOnly; Path=/; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`;
 }
 
 export function clearAuthCookie(isProduction: boolean): string {
   if (isProduction) {
-    return `auth_token=; HttpOnly; Path=/; SameSite=Lax; Secure; Domain=.livedetector.softween.com; Max-Age=0`;
+    return `auth_token=; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=0`;
   }
   return `auth_token=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0`;
 }

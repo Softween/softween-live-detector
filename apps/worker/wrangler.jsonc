@@ -9,25 +9,19 @@
     {
       "binding": "DB",
       "database_name": "live-checker-db",
-      "database_id": "93782ce8-a134-4f88-94cd-5ab0cd413533"
+      "database_id": "16d0034b-d0e9-4b4c-b0f7-d317cc7c7101"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "f3f3b9d190b34444bb4633bf03771f1d"
+      "id": "22e3e8b5303f407580ff9ede865054ae"
     }
   ],
   "vars": {
     "ENVIRONMENT": "production",
-    "FRONTEND_URL": "https://livedetector.softween.com"
+    "FRONTEND_URL": "https://softween-live-checker-8os.pages.dev"
   },
-  "routes": [
-    {
-      "pattern": "api.livedetector.softween.com/*",
-      "zone_name": "softween.com"
-    }
-  ],
   "triggers": {
     "crons": ["*/5 * * * *"]
   }
