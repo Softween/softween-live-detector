@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
+import { useSEO } from '../hooks/useSEO';
 
 export default function Landing() {
   const { t } = useTranslation();
+
+  useSEO({
+    title: 'Free Uptime Monitoring & Status Pages',
+    description: 'Monitor your websites with 5-minute interval checks. Get instant email and webhook alerts when your sites go down. Free public status pages and uptime badges.',
+  });
 
   return (
     <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
@@ -79,6 +85,7 @@ export default function Landing() {
         </div>
 
         {/* Features */}
+        <h2 className="sr-only">Features</h2>
         <div className="grid sm:grid-cols-2 gap-4 mt-20 text-left">
           {[
             {

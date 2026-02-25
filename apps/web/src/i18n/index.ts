@@ -17,4 +17,11 @@ i18n.use(initReactI18next).init({
   },
 });
 
+// Update HTML lang attribute when language changes
+const updateLang = (lng: string) => {
+  document.documentElement.lang = lng;
+};
+updateLang(savedLang);
+i18n.on('languageChanged', updateLang);
+
 export default i18n;

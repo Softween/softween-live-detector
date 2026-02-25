@@ -1,16 +1,98 @@
 <!doctype html>
-<html lang="tr" class="dark">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#09090b" />
-    <title>LiveDetector - Uptime Monitoring</title>
+
+    <!-- Primary SEO -->
+    <title>LiveDetector - Free Uptime Monitoring & Status Pages</title>
+    <meta name="description" content="Monitor your websites with 5-minute interval checks. Get instant email and webhook alerts when your sites go down. Free public status pages, 90-day uptime history, and embeddable badges." />
+    <meta name="keywords" content="uptime monitoring, website monitoring, status page, uptime checker, site down alert, server monitoring, webhook notifications, uptime badge" />
+    <meta name="author" content="Softween" />
+    <link rel="canonical" href="https://livedetector.softween.com" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://livedetector.softween.com" />
+    <meta property="og:title" content="LiveDetector - Free Uptime Monitoring & Status Pages" />
+    <meta property="og:description" content="Monitor your websites with 5-minute interval checks. Get instant alerts when your sites go down. Free status pages and uptime badges." />
+    <meta property="og:site_name" content="LiveDetector" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="tr_TR" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="LiveDetector - Free Uptime Monitoring" />
+    <meta name="twitter:description" content="Monitor your websites with 5-minute interval checks. Get instant alerts when your sites go down." />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+
+    <!-- Language alternates -->
+    <link rel="alternate" hreflang="en" href="https://livedetector.softween.com" />
+    <link rel="alternate" hreflang="tr" href="https://livedetector.softween.com" />
+    <link rel="alternate" hreflang="x-default" href="https://livedetector.softween.com" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "LiveDetector",
+      "applicationCategory": "WebApplication",
+      "operatingSystem": "Web",
+      "description": "Free uptime monitoring tool with 5-minute interval checks, instant alerts, public status pages, and embeddable uptime badges.",
+      "url": "https://livedetector.softween.com",
+      "author": {
+        "@type": "Organization",
+        "name": "Softween",
+        "url": "https://softween.com"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "5-minute interval uptime checks",
+        "Email and webhook notifications",
+        "Public status pages",
+        "90-day uptime history",
+        "Embeddable uptime badges",
+        "Discord and Slack webhook support"
+      ]
+    }
+    </script>
   </head>
   <body class="bg-[#09090b] text-zinc-100 antialiased">
+    <!-- SEO: Noscript fallback content for crawlers -->
+    <noscript>
+      <div style="background:#09090b;color:#e4e4e7;font-family:Inter,sans-serif;padding:60px 20px;text-align:center">
+        <h1>LiveDetector - Free Uptime Monitoring</h1>
+        <p>Monitor your websites with 5-minute interval checks. Get instant email and webhook alerts when your sites go down.</p>
+        <h2>Features</h2>
+        <ul style="list-style:none;padding:0">
+          <li>5-Minute Interval Checks</li>
+          <li>Instant Email & Webhook Alerts</li>
+          <li>Public Status Pages</li>
+          <li>90-Day Uptime History</li>
+          <li>Embeddable Uptime Badges</li>
+          <li>Discord & Slack Integration</li>
+        </ul>
+        <p><a href="https://livedetector.softween.com/register" style="color:#8b5cf6">Get Started Free</a></p>
+      </div>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

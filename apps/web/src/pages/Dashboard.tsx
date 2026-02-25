@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import type { Monitor } from 'shared';
 import { api } from '../api/client';
 import { CardSkeleton } from '../components/ui/Skeleton';
+import { useSEO } from '../hooks/useSEO';
 
 function StatusDot({ status }: { status: string }) {
   const cls = status === 'up' ? 'dot-up' : status === 'down' ? 'dot-down' : 'dot-unknown';
@@ -21,6 +22,7 @@ type SortOption = 'name' | 'status' | 'last_checked';
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  useSEO({ title: 'Dashboard', noindex: true });
   const [monitors, setMonitors] = useState<Monitor[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'up' | 'down'>('all');

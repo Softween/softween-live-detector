@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Allow: /status/
+Disallow: /dashboard
+Disallow: /monitors/
+Disallow: /settings
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://livedetector.softween.com/sitemap.xml

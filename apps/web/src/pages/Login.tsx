@@ -2,10 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { useSEO } from '../hooks/useSEO';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
 
 export default function Login() {
   const { t } = useTranslation();
+  useSEO({ title: 'Sign In', noindex: true });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');

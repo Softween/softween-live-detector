@@ -5,6 +5,7 @@ import type { StatusPagePublic } from 'shared';
 import { api } from '../api/client';
 import UptimeBar from '../components/ui/UptimeBar';
 import Spinner from '../components/ui/Spinner';
+import { useSEO } from '../hooks/useSEO';
 
 export default function StatusPage() {
   const { t } = useTranslation();
@@ -39,6 +40,11 @@ export default function StatusPage() {
       </div>
     );
   }
+
+  useSEO({
+    title: `${data.title} - Status`,
+    description: data.description || `Current status of ${data.title} services`,
+  });
 
   const allUp = data.monitors.every((m) => m.current_status === 'up');
   const someDown = data.monitors.some((m) => m.current_status === 'down');

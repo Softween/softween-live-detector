@@ -2,10 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
+import { useSEO } from '../hooks/useSEO';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
 
 export default function Register() {
   const { t } = useTranslation();
+  useSEO({ title: 'Sign Up - Free Uptime Monitoring', description: 'Create a free account and start monitoring your websites in seconds. 5-minute checks, instant alerts, and public status pages.' });
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
