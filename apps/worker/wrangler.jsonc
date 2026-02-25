@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softween-live-checker-api",
+  "account_id": "a01ee186bf9ebcbfc2e3e21e4c948737",
   "main": "src/index.ts",
   "workers_dev": true,
   "compatibility_date": "2026-02-08",
@@ -9,18 +10,18 @@
     {
       "binding": "DB",
       "database_name": "live-checker-db",
-      "database_id": "16d0034b-d0e9-4b4c-b0f7-d317cc7c7101"
+      "database_id": "93782ce8-a134-4f88-94cd-5ab0cd413533"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "KV",
-      "id": "22e3e8b5303f407580ff9ede865054ae"
+      "id": "f3f3b9d190b34444bb4633bf03771f1d"
     }
   ],
   "vars": {
     "ENVIRONMENT": "production",
-    "FRONTEND_URL": "https://softween-live-checker-8os.pages.dev"
+    "FRONTEND_URL": "https://softween-live-checker.pages.dev"
   },
   "triggers": {
     "crons": ["*/5 * * * *"]
