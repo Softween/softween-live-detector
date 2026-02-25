@@ -13,7 +13,9 @@
     "error": "Something went wrong",
     "success": "Success",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "copy": "Copy",
+    "copied": "Copied!"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -145,7 +147,12 @@
     "checkInterval": "Checked every 5 minutes",
     "method": "Method",
     "expectedStatus": "Expected",
-    "timeoutLabel": "Timeout"
+    "timeoutLabel": "Timeout",
+    "uptimeHistory": "Uptime History",
+    "last90days": "Last 90 days",
+    "daysAgoLabel": "days ago",
+    "todayLabel": "Today",
+    "badge": "Embed Badge"
   },
   "time": {
     "justNow": "Just now",
@@ -166,7 +173,34 @@
     "cooldown30": "30 minutes",
     "cooldown60": "60 minutes",
     "saveSuccess": "Settings saved",
-    "saveError": "Failed to save settings"
+    "saveError": "Failed to save settings",
+    "webhookNotifications": "Webhook Notifications",
+    "webhookDesc": "Send alerts to Discord, Slack or any webhook URL",
+    "webhookUrl": "Webhook URL",
+    "webhookHint": "Supports Discord and Slack webhook URLs",
+    "statusPageTitle": "Public Status Page",
+    "statusPageSlug": "URL Slug",
+    "statusPageName": "Page Title",
+    "statusPageDescription": "Description",
+    "statusPageDescPlaceholder": "Current status of our services",
+    "statusPagePublic": "Public Access",
+    "statusPagePublicDesc": "Anyone with the link can view this page",
+    "statusPageMonitors": "Monitors to Display",
+    "noMonitorsToAdd": "No monitors available",
+    "statusPageSave": "Save Status Page",
+    "statusPageSaved": "Status page saved",
+    "statusPageUrl": "Your Status Page"
+  },
+  "statusPage": {
+    "notFound": "Status Page Not Found",
+    "notFoundDesc": "This status page doesn't exist or is not public.",
+    "allOperational": "All Systems Operational",
+    "someDown": "Some Systems Down",
+    "someIssues": "Some Systems Have Issues",
+    "uptime": "uptime",
+    "days90ago": "90 days ago",
+    "today": "Today",
+    "poweredBy": "Powered by LiveDetector"
   },
   "error": {
     "title": "Something went wrong",

@@ -3,10 +3,11 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import type { Monitor, MonitorStats, Check } from 'shared';
+import type { Monitor, MonitorStats, Check, DailyUptime } from 'shared';
 import { api } from '../api/client';
 import Modal from '../components/ui/Modal';
 import Spinner from '../components/ui/Spinner';
+import UptimeBar from '../components/ui/UptimeBar';
 import { StatSkeleton, ChartSkeleton } from '../components/ui/Skeleton';
 
 function formatMs(ms: number | null): string {
@@ -31,6 +32,7 @@ export default function MonitorDetail() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [dailyUptime, setDailyUptime] = useState<DailyUptime[]>([]);
 
   useEffect(() => {
     if (!id) return;
@@ -42,15 +44,17 @@ export default function MonitorDetail() {
   async function loadData() {
     if (!id) return;
     try {
-      const [monitorData, statsData, checksData] = await Promise.all([
+      const [monitorData, statsData, checksData, uptimeData] = await Promise.all([
         api.monitors.get(id),
         api.checks.stats(id, period),
         api.checks.history(id, 1, 50),
+        api.checks.dailyUptime(id),
       ]);
       setMonitor(monitorData);
       setStats(statsData);
       setChecks(checksData.data);
       setHasMore(checksData.data.length === 50);
+      setDailyUptime(uptimeData);
     } catch {
       toast.error(t('monitor.notFound'));
       navigate('/dashboard');
@@ -209,6 +213,20 @@ export default function MonitorDetail() {
         </div>
       </div>
 
+      {dailyUptime.length > 0 && (
+        <div className="card p-5 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">{t('detail.uptimeHistory')}</h3>
+            <span className="text-[10px] text-zinc-600">{t('detail.last90days')}</span>
+          </div>
+          <UptimeBar data={dailyUptime} />
+          <div className="flex justify-between mt-2">
+            <span className="text-[10px] text-zinc-600">90 {t('detail.daysAgoLabel')}</span>
+            <span className="text-[10px] text-zinc-600">{t('detail.todayLabel')}</span>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center gap-3 mb-5">
         <div className="flex rounded-lg border border-white/[0.06] bg-white/[0.02] p-0.5">
           {(['24h', '7d', '30d'] as const).map((p) => (
@@ -288,6 +306,23 @@ export default function MonitorDetail() {
             )}
           </>
         )}
+      </div>
+
+      {/* Badge embed */}
+      <div className="card p-4 mt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1">{t('detail.badge')}</div>
+            <code className="text-[11px] text-zinc-400 break-all">
+              {`![uptime](${window.location.origin.replace(/:\d+$/, '').replace('livedetector.', 'api.livedetector.')}/api/status-page/badge/${monitor.id})`}
+            </code>
+          </div>
+          <img
+            src={`${import.meta.env.VITE_API_URL || ''}/api/status-page/badge/${monitor.id}`}
+            alt="uptime badge"
+            className="flex-shrink-0 ml-3"
+          />
+        </div>
       </div>
 
       <Modal

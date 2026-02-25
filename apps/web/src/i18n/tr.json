@@ -13,7 +13,9 @@
     "error": "Bir hata oluştu",
     "success": "Başarılı",
     "confirm": "Onayla",
-    "close": "Kapat"
+    "close": "Kapat",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -145,7 +147,12 @@
     "checkInterval": "Her 5 dakikada bir kontrol edilir",
     "method": "Metod",
     "expectedStatus": "Beklenen",
-    "timeoutLabel": "Timeout"
+    "timeoutLabel": "Timeout",
+    "uptimeHistory": "Uptime Geçmişi",
+    "last90days": "Son 90 gün",
+    "daysAgoLabel": "gün önce",
+    "todayLabel": "Bugün",
+    "badge": "Rozet Ekle"
   },
   "time": {
     "justNow": "Az önce",
@@ -166,7 +173,34 @@
     "cooldown30": "30 dakika",
     "cooldown60": "60 dakika",
     "saveSuccess": "Ayarlar kaydedildi",
-    "saveError": "Ayarlar kaydedilemedi"
+    "saveError": "Ayarlar kaydedilemedi",
+    "webhookNotifications": "Webhook Bildirimleri",
+    "webhookDesc": "Discord, Slack veya herhangi bir webhook URL'sine bildirim gönderin",
+    "webhookUrl": "Webhook URL",
+    "webhookHint": "Discord ve Slack webhook URL'lerini destekler",
+    "statusPageTitle": "Herkese Açık Durum Sayfası",
+    "statusPageSlug": "URL Kısa Adı",
+    "statusPageName": "Sayfa Başlığı",
+    "statusPageDescription": "Açıklama",
+    "statusPageDescPlaceholder": "Servislerimizin güncel durumu",
+    "statusPagePublic": "Herkese Açık",
+    "statusPagePublicDesc": "Linke sahip herkes bu sayfayı görüntüleyebilir",
+    "statusPageMonitors": "Gösterilecek Monitörler",
+    "noMonitorsToAdd": "Eklenecek monitör yok",
+    "statusPageSave": "Durum Sayfasını Kaydet",
+    "statusPageSaved": "Durum sayfası kaydedildi",
+    "statusPageUrl": "Durum Sayfanız"
+  },
+  "statusPage": {
+    "notFound": "Durum Sayfası Bulunamadı",
+    "notFoundDesc": "Bu durum sayfası mevcut değil veya herkese açık değil.",
+    "allOperational": "Tüm Sistemler Çalışıyor",
+    "someDown": "Bazı Sistemler Down",
+    "someIssues": "Bazı Sistemlerde Sorun Var",
+    "uptime": "uptime",
+    "days90ago": "90 gün önce",
+    "today": "Bugün",
+    "poweredBy": "LiveDetector tarafından desteklenmektedir"
   },
   "error": {
     "title": "Bir hata oluştu",

@@ -116,18 +116,20 @@ auth.get('/me', authMiddleware, async (c) => {
 auth.get('/notifications', authMiddleware, async (c) => {
   const userId = c.get('userId');
   const settings = await c.env.DB.prepare(
-    'SELECT email_enabled, cooldown_minutes FROM notification_settings WHERE user_id = ?',
+    'SELECT email_enabled, cooldown_minutes, webhook_url, webhook_enabled FROM notification_settings WHERE user_id = ?',
   )
     .bind(userId)
-    .first<{ email_enabled: number; cooldown_minutes: number }>();
+    .first<{ email_enabled: number; cooldown_minutes: number; webhook_url: string | null; webhook_enabled: number }>();
 
   if (!settings) {
-    return c.json({ email_enabled: true, cooldown_minutes: 15 });
+    return c.json({ email_enabled: true, cooldown_minutes: 15, webhook_url: '', webhook_enabled: false });
   }
 
   return c.json({
     email_enabled: settings.email_enabled === 1,
     cooldown_minutes: settings.cooldown_minutes,
+    webhook_url: settings.webhook_url || '',
+    webhook_enabled: settings.webhook_enabled === 1,
   });
 });
 
@@ -140,13 +142,21 @@ auth.put('/notifications', authMiddleware, async (c) => {
   }
 
   const userId = c.get('userId');
+  const webhookUrl = parsed.data.webhook_url || null;
+  const webhookEnabled = parsed.data.webhook_enabled ? 1 : 0;
+
   await c.env.DB.prepare(
-    'UPDATE notification_settings SET email_enabled = ?, cooldown_minutes = ? WHERE user_id = ?',
+    'UPDATE notification_settings SET email_enabled = ?, cooldown_minutes = ?, webhook_url = ?, webhook_enabled = ? WHERE user_id = ?',
   )
-    .bind(parsed.data.email_enabled ? 1 : 0, parsed.data.cooldown_minutes, userId)
+    .bind(parsed.data.email_enabled ? 1 : 0, parsed.data.cooldown_minutes, webhookUrl, webhookEnabled, userId)
     .run();
 
-  return c.json({ email_enabled: parsed.data.email_enabled, cooldown_minutes: parsed.data.cooldown_minutes });
+  return c.json({
+    email_enabled: parsed.data.email_enabled,
+    cooldown_minutes: parsed.data.cooldown_minutes,
+    webhook_url: webhookUrl || '',
+    webhook_enabled: parsed.data.webhook_enabled || false,
+  });
 });
 
 export { auth as authRoutes };

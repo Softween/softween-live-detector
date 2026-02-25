@@ -1,4 +1,4 @@
-import type { Monitor, MonitorStats, Check, PaginatedResponse } from 'shared';
+import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic } from 'shared';
 import i18n from '../i18n';
 
 class ApiError extends Error {
@@ -46,9 +46,9 @@ export const api = {
     logout: () => request<{ success: boolean }>('/api/auth/logout', { method: 'POST' }),
     me: () => request<{ id: string; email: string; name: string; created_at: string }>('/api/auth/me'),
     getNotifications: () =>
-      request<{ email_enabled: boolean; cooldown_minutes: number }>('/api/auth/notifications'),
-    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string }) =>
-      request<{ email_enabled: boolean; cooldown_minutes: number }>('/api/auth/notifications', {
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean }>('/api/auth/notifications'),
+    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string; webhook_url?: string; webhook_enabled?: boolean }) =>
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean }>('/api/auth/notifications', {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
@@ -70,10 +70,21 @@ export const api = {
       request<PaginatedResponse<Check>>(`/api/checks/${monitorId}/history?page=${page}&limit=${limit}`),
     stats: (monitorId: string, period: '24h' | '7d' | '30d' = '24h') =>
       request<MonitorStats>(`/api/checks/${monitorId}/stats?period=${period}`),
+    dailyUptime: (monitorId: string, days = 90) =>
+      request<DailyUptime[]>(`/api/checks/${monitorId}/daily-uptime?days=${days}`),
   },
   visitor: {
     increment: () => request<{ count: number }>('/api/visitor', { method: 'POST' }),
     get: () => request<{ count: number }>('/api/visitor'),
+  },
+  statusPage: {
+    getMine: () => request<{ page: StatusPage | null; monitor_ids: string[] }>('/api/status-page/mine'),
+    updateMine: (data: { slug: string; title: string; description?: string; is_public: boolean; monitor_ids: string[] }) =>
+      request<{ page: StatusPage; monitor_ids: string[] }>('/api/status-page/mine', {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+    getPublic: (slug: string) => request<StatusPagePublic>(`/api/status-page/s/${slug}`),
   },
 };
 

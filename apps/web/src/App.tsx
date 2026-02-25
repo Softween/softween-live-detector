@@ -15,6 +15,7 @@ const MonitorDetail = lazy(() => import('./pages/MonitorDetail'));
 const AddMonitor = lazy(() => import('./pages/AddMonitor'));
 const EditMonitor = lazy(() => import('./pages/EditMonitor'));
 const Settings = lazy(() => import('./pages/Settings'));
+const StatusPage = lazy(() => import('./pages/StatusPage'));
 
 function PageLoader() {
   return (
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+          <Route path="/status/:slug" element={<StatusPage />} />
           <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/monitors/new" element={<AddMonitor />} />

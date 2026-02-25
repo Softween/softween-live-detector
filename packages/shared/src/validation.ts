@@ -30,6 +30,16 @@ export const updateMonitorSchema = z.object({
 export const updateNotificationSettingsSchema = z.object({
   email_enabled: z.boolean(),
   cooldown_minutes: z.enum(['5', '15', '30', '60']).transform(Number),
+  webhook_url: z.string().url().max(2000).optional().or(z.literal('')),
+  webhook_enabled: z.boolean().optional(),
+});
+
+export const updateStatusPageSchema = z.object({
+  slug: z.string().min(3).max(50).regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers and hyphens'),
+  title: z.string().min(1).max(100),
+  description: z.string().max(500).optional().or(z.literal('')),
+  is_public: z.boolean(),
+  monitor_ids: z.array(z.string()).max(20),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -37,3 +47,4 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateMonitorInput = z.infer<typeof createMonitorSchema>;
 export type UpdateMonitorInput = z.infer<typeof updateMonitorSchema>;
 export type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>;
+export type UpdateStatusPageInput = z.infer<typeof updateStatusPageSchema>;

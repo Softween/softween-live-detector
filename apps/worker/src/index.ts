@@ -4,6 +4,7 @@ import { authRoutes } from './routes/auth.routes';
 import { monitorRoutes } from './routes/monitors.routes';
 import { checkRoutes } from './routes/checks.routes';
 import { visitorRoutes } from './routes/visitor.routes';
+import { statusPageRoutes } from './routes/status-page.routes';
 import { handleScheduled } from './cron/scheduled';
 import type { Env } from './env';
 
@@ -20,6 +21,7 @@ app.route('/api/auth', authRoutes);
 app.route('/api/monitors', monitorRoutes);
 app.route('/api/checks', checkRoutes);
 app.route('/api/visitor', visitorRoutes);
+app.route('/api/status-page', statusPageRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));
