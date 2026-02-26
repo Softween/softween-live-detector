@@ -1,4 +1,4 @@
-import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic } from 'shared';
+import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic, HeartbeatMonitor, ApiKey, Team, TeamMember, WebhookLog, SLAReport, IncidentUpdate } from 'shared';
 import i18n from '../i18n';
 
 class ApiError extends Error {
@@ -80,9 +80,9 @@ export const api = {
         body: JSON.stringify({ password }),
       }),
     getNotifications: () =>
-      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean }>('/api/auth/notifications'),
-    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string; webhook_url?: string; webhook_enabled?: boolean; slow_threshold_ms?: number | null; slow_alert_enabled?: boolean }) =>
-      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean }>('/api/auth/notifications', {
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean; telegram_bot_token: string | null; telegram_chat_id: string | null; telegram_enabled: boolean; weekly_report_enabled: boolean }>('/api/auth/notifications'),
+    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string; webhook_url?: string; webhook_enabled?: boolean; slow_threshold_ms?: number | null; slow_alert_enabled?: boolean; telegram_bot_token?: string | null; telegram_chat_id?: string | null; telegram_enabled?: boolean; weekly_report_enabled?: boolean }) =>
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean; telegram_bot_token: string | null; telegram_chat_id: string | null; telegram_enabled: boolean; weekly_report_enabled: boolean }>('/api/auth/notifications', {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
@@ -90,9 +90,9 @@ export const api = {
   monitors: {
     list: () => request<Monitor[]>('/api/monitors'),
     get: (id: string) => request<Monitor>(`/api/monitors/${id}`),
-    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number; check_keyword?: string }) =>
+    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number; check_keyword?: string; check_interval_seconds?: number; custom_headers?: string; monitor_type?: string; port?: number; check_regions?: string }) =>
       request<Monitor>('/api/monitors', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number; check_keyword: string | null; maintenance_start: string | null; maintenance_end: string | null }>) =>
+    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number; check_keyword: string | null; maintenance_start: string | null; maintenance_end: string | null; check_interval_seconds: number; custom_headers: string | null; monitor_type: string; port: number | null; check_regions: string }>) =>
       request<Monitor>(`/api/monitors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => request<{ success: boolean }>(`/api/monitors/${id}`, { method: 'DELETE' }),
     pause: (id: string) => request<Monitor>(`/api/monitors/${id}/pause`, { method: 'POST' }),
@@ -121,6 +121,49 @@ export const api = {
         body: JSON.stringify(data),
       }),
     getPublic: (slug: string) => request<StatusPagePublic>(`/api/status-page/s/${slug}`),
+    subscribe: (slug: string, email: string) =>
+      request<{ success: boolean }>(`/api/status-page/s/${slug}/subscribe`, { method: 'POST', body: JSON.stringify({ email }) }),
+  },
+  heartbeats: {
+    list: () => request<HeartbeatMonitor[]>('/api/heartbeat'),
+    create: (data: { name: string; expected_interval_seconds?: number; grace_period_seconds?: number }) =>
+      request<HeartbeatMonitor>('/api/heartbeat', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<{ success: boolean }>(`/api/heartbeat/${id}`, { method: 'DELETE' }),
+  },
+  apiKeys: {
+    list: () => request<ApiKey[]>('/api/apikeys'),
+    create: (name: string) =>
+      request<{ key: ApiKey; raw_key: string }>('/api/apikeys', { method: 'POST', body: JSON.stringify({ name }) }),
+    delete: (id: string) => request<{ success: boolean }>(`/api/apikeys/${id}`, { method: 'DELETE' }),
+  },
+  teams: {
+    get: () => request<{ team: Team; members: TeamMember[] }>('/api/teams'),
+    create: (name: string) =>
+      request<Team>('/api/teams', { method: 'POST', body: JSON.stringify({ name }) }),
+    invite: (email: string, role?: string) =>
+      request<{ success: boolean }>('/api/teams/invite', { method: 'POST', body: JSON.stringify({ email, role }) }),
+    acceptInvite: (token: string) =>
+      request<{ success: boolean }>('/api/teams/accept-invite', { method: 'POST', body: JSON.stringify({ token }) }),
+    removeMember: (memberId: string) =>
+      request<{ success: boolean }>(`/api/teams/members/${memberId}`, { method: 'DELETE' }),
+  },
+  incidents: {
+    list: (monitorId: string) =>
+      request<{ incidents: Array<{ id: string; started_at: string; resolved_at: string | null; cause: string | null; updates: IncidentUpdate[] }> }>(`/api/incidents/${monitorId}`),
+    addUpdate: (incidentId: string, data: { status: string; message: string }) =>
+      request<IncidentUpdate>(`/api/incidents/${incidentId}/updates`, { method: 'POST', body: JSON.stringify(data) }),
+  },
+  sla: {
+    report: (monitorId: string, period?: string, target?: number) => {
+      const params = new URLSearchParams();
+      if (period) params.set('period', period);
+      if (target) params.set('target', String(target));
+      return request<SLAReport>(`/api/sla/${monitorId}?${params}`);
+    },
+  },
+  webhooks: {
+    test: () => request<{ success: boolean; status_code?: number; error?: string }>('/api/webhooks/test', { method: 'POST' }),
+    logs: () => request<WebhookLog[]>('/api/webhooks/logs'),
   },
 };
 

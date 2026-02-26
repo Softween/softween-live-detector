@@ -2,6 +2,8 @@ import { CRON_BATCH_SIZE } from 'shared';
 import { pingMonitor, type PingResult } from '../services/ping.service';
 import { sendStatusNotification, sendSlowResponseNotification } from '../services/notification.service';
 import { runCleanup } from '../services/cleanup.service';
+import { checkExpiredHeartbeats } from '../services/heartbeat.service';
+import { checkSSLExpiry } from '../services/ssl.service';
 import type { Env } from '../env';
 
 interface MonitorRow {
@@ -14,6 +16,10 @@ interface MonitorRow {
   check_keyword: string | null;
   maintenance_start: string | null;
   maintenance_end: string | null;
+  check_interval_seconds: number | null;
+  custom_headers: string | null;
+  monitor_type: string;
+  port: number | null;
 }
 
 function isInMaintenance(monitor: MonitorRow): boolean {
@@ -28,7 +34,7 @@ export async function handleScheduled(
 ): Promise<void> {
   // 1. Fetch all active monitors
   const monitors = await env.DB.prepare(
-    'SELECT id, url, method, expected_status, timeout_ms, current_status, check_keyword, maintenance_start, maintenance_end FROM monitors WHERE is_active = 1',
+    'SELECT id, url, method, expected_status, timeout_ms, current_status, check_keyword, maintenance_start, maintenance_end, check_interval_seconds, custom_headers, monitor_type, port FROM monitors WHERE is_active = 1',
   ).all<MonitorRow>();
 
   if (!monitors.results || monitors.results.length === 0) return;
@@ -94,6 +100,17 @@ export async function handleScheduled(
 
   // 8. Run daily cleanup
   await runCleanup(env);
+
+  // 9. Check expired heartbeat monitors
+  await checkExpiredHeartbeats(env);
+
+  // 10. Run SSL check once per day
+  const lastSslCheck = await env.KV.get('cron:last_ssl_check');
+  const today = new Date().toISOString().split('T')[0];
+  if (lastSslCheck !== today) {
+    await checkSSLExpiry(env);
+    await env.KV.put('cron:last_ssl_check', today);
+  }
 }
 
 async function handleStatusChange(change: PingResult, env: Env): Promise<void> {

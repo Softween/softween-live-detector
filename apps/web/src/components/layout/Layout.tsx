@@ -3,12 +3,14 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import LanguageSwitcher from '../ui/LanguageSwitcher';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   async function handleLogout() {
     await logout();
@@ -54,10 +56,31 @@ export default function Layout() {
               >
                 {t('nav.settings')}
               </Link>
+              <Link
+                to="/heartbeats"
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                  isActive('/heartbeats')
+                    ? 'text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {t('nav.heartbeats')}
+              </Link>
             </nav>
           </div>
 
           <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-md hover:bg-zinc-800/60 transition-colors text-zinc-500 hover:text-zinc-200"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" /></svg>
+              )}
+            </button>
             <LanguageSwitcher />
             <div className="h-4 w-px bg-white/[0.06]" />
             <span className="text-xs text-zinc-500">{user?.name}</span>
@@ -104,6 +127,15 @@ export default function Layout() {
                 }`}
               >
                 {t('nav.settings')}
+              </Link>
+              <Link
+                to="/heartbeats"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-lg text-sm ${
+                  isActive('/heartbeats') ? 'text-zinc-100 bg-white/[0.04]' : 'text-zinc-400'
+                }`}
+              >
+                {t('nav.heartbeats')}
               </Link>
               <div className="border-t border-white/[0.04] pt-2 mt-2 flex items-center justify-between px-3">
                 <span className="text-xs text-zinc-500">{user?.name}</span>

@@ -75,6 +75,40 @@ statusPage.get('/s/:slug', async (c) => {
   });
 });
 
+// Subscribe to status page
+statusPage.post('/s/:slug/subscribe', async (c) => {
+  const slug = c.req.param('slug');
+  const body = await c.req.json();
+  const email = body?.email;
+  if (!email || typeof email !== 'string') return c.json({ error: 'Email gerekli' }, 400);
+
+  const page = await c.env.DB.prepare(
+    'SELECT id FROM status_pages WHERE slug = ? AND is_public = 1',
+  ).bind(slug).first<{ id: string }>();
+  if (!page) return c.json({ error: 'Sayfa bulunamadı' }, 404);
+
+  const token = crypto.randomUUID().replace(/-/g, '');
+
+  try {
+    await c.env.DB.prepare(
+      'INSERT INTO status_page_subscribers (id, status_page_id, email, token, confirmed) VALUES (?, ?, ?, ?, 1)',
+    ).bind(crypto.randomUUID(), page.id, email, token).run();
+  } catch {
+    // Already subscribed - ignore duplicate
+  }
+
+  return c.json({ success: true });
+});
+
+// Unsubscribe
+statusPage.get('/unsubscribe/:token', async (c) => {
+  const token = c.req.param('token');
+  await c.env.DB.prepare(
+    'DELETE FROM status_page_subscribers WHERE token = ?',
+  ).bind(token).run();
+  return c.text('Abonelikten çıktınız / Unsubscribed');
+});
+
 // --- Badge endpoint: SVG uptime badge (public, no auth) ---
 statusPage.get('/badge/:monitorId', async (c) => {
   const monitorId = c.req.param('monitorId');

@@ -16,6 +16,19 @@ function formatMs(ms: number | null): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+interface Incident {
+  id: string;
+  started_at: string;
+  resolved_at: string | null;
+  cause: string | null;
+  updates: Array<{
+    id: string;
+    status: string;
+    message: string;
+    created_at: string;
+  }>;
+}
+
 export default function MonitorDetail() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -33,6 +46,8 @@ export default function MonitorDetail() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [dailyUptime, setDailyUptime] = useState<DailyUptime[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [sla, setSla] = useState<any>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -55,6 +70,15 @@ export default function MonitorDetail() {
       setChecks(checksData.data);
       setHasMore(checksData.data.length === 50);
       setDailyUptime(uptimeData);
+
+      // Load incidents and SLA (non-blocking)
+      (api as any).incidents?.list?.(id)
+        ?.then((data: Incident[]) => setIncidents(data))
+        ?.catch(() => {});
+
+      (api as any).sla?.report?.(id)
+        ?.then((data: any) => setSla(data))
+        ?.catch(() => {});
     } catch {
       toast.error(t('monitor.notFound'));
       navigate('/dashboard');
@@ -168,6 +192,8 @@ export default function MonitorDetail() {
 
   if (!monitor || !stats) return null;
 
+  const monitorAny = monitor as any;
+
   const chartData = [...checks]
     .reverse()
     .filter((c) => c.response_time_ms !== null)
@@ -178,6 +204,11 @@ export default function MonitorDetail() {
 
   const statusDuration = monitor.last_checked_at ? getTimeSince(monitor.last_checked_at, t) : null;
 
+  const checkIntervalSeconds = monitorAny.check_interval_seconds || 300;
+  const checkIntervalLabel = checkIntervalSeconds < 60
+    ? t('detail.checkIntervalDynamic', { seconds: checkIntervalSeconds })
+    : t('detail.checkIntervalDynamic', { seconds: checkIntervalSeconds });
+
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
@@ -187,12 +218,32 @@ export default function MonitorDetail() {
             <h1 className="text-xl font-bold tracking-tight text-zinc-100">{monitor.name}</h1>
             {!monitor.is_active && <span className="badge-paused">{t('monitor.paused')}</span>}
           </div>
-          <p className="text-sm text-zinc-500 mt-1.5">{monitor.url}</p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+            <p className="text-sm text-zinc-500">{monitor.url}</p>
+            {monitorAny.ssl_expiry_at && (
+              <span className="text-xs text-zinc-600">
+                SSL: {new Date(monitorAny.ssl_expiry_at).toLocaleDateString()} ({monitorAny.ssl_issuer || t('detail.unknown')})
+              </span>
+            )}
+            {monitorAny.domain_expiry_at && (
+              <span className="text-xs text-zinc-600">
+                {t('detail.domainExpiry')}: {new Date(monitorAny.domain_expiry_at).toLocaleDateString()}
+              </span>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2.5 text-xs text-zinc-600">
             {statusDuration && <span>{t('monitor.lastCheck')} {statusDuration}</span>}
-            <span>{t('detail.method')}: {monitor.method}</span>
-            <span>{t('detail.expectedStatus')}: {monitor.expected_status}</span>
+            <span>{(monitorAny.monitor_type || 'http').toUpperCase()}</span>
+            {monitorAny.monitor_type !== 'tcp' && (
+              <>
+                <span>{t('detail.method')}: {monitor.method}</span>
+                <span>{t('detail.expectedStatus')}: {monitor.expected_status}</span>
+              </>
+            )}
             <span>{t('detail.timeoutLabel')}: {monitor.timeout_ms / 1000}s</span>
+            {monitorAny.check_regions && monitorAny.check_regions !== 'auto' && (
+              <span>{t('detail.region')}: {monitorAny.check_regions.toUpperCase()}</span>
+            )}
           </div>
         </div>
         <div className="flex gap-2 flex-shrink-0 flex-wrap">
@@ -263,7 +314,9 @@ export default function MonitorDetail() {
             </button>
           ))}
         </div>
-        <span className="ml-auto text-[11px] text-zinc-600">{t('detail.checkInterval')}</span>
+        <span className="ml-auto text-[11px] text-zinc-600">
+          {checkIntervalLabel}
+        </span>
       </div>
 
       {chartData.length > 0 && (
@@ -287,6 +340,63 @@ export default function MonitorDetail() {
               <Line type="monotone" dataKey="ms" stroke="#8b5cf6" strokeWidth={1.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Incident Timeline */}
+      {incidents.length > 0 && (
+        <div className="card overflow-hidden mb-6">
+          <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider p-4 border-b border-white/[0.06]">
+            {t('detail.incidentTimeline')}
+          </h3>
+          <div className="divide-y divide-white/[0.04]">
+            {incidents.map((incident) => (
+              <div key={incident.id} className="px-4 py-3">
+                <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className={incident.resolved_at ? 'dot-up' : 'dot-down'} />
+                    <span className="text-xs font-medium text-zinc-200">
+                      {incident.cause || t('detail.incidentUnknownCause')}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-zinc-600 tabular-nums">
+                    {new Date(incident.started_at + 'Z').toLocaleString(undefined, {
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </span>
+                </div>
+                {incident.resolved_at && (
+                  <p className="text-[11px] text-zinc-500 ml-4">
+                    {t('detail.incidentResolved')}: {new Date(incident.resolved_at + 'Z').toLocaleString(undefined, {
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+                    })}
+                  </p>
+                )}
+                {incident.updates.length > 0 && (
+                  <div className="mt-2 ml-4 space-y-1.5">
+                    {incident.updates.map((update) => (
+                      <div key={update.id} className="flex items-start gap-2">
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0 ${
+                          update.status === 'resolved' ? 'text-emerald-400 bg-emerald-500/10' :
+                          update.status === 'investigating' ? 'text-amber-400 bg-amber-500/10' :
+                          update.status === 'identified' ? 'text-orange-400 bg-orange-500/10' :
+                          'text-zinc-400 bg-zinc-500/10'
+                        }`}>
+                          {update.status}
+                        </span>
+                        <span className="text-[11px] text-zinc-400">{update.message}</span>
+                        <span className="text-[10px] text-zinc-600 ml-auto flex-shrink-0 tabular-nums">
+                          {new Date(update.created_at + 'Z').toLocaleTimeString(undefined, {
+                            hour: '2-digit', minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -341,6 +451,31 @@ export default function MonitorDetail() {
           </div>
         </div>
       </div>
+
+      {/* SLA Report */}
+      {sla && (
+        <div className="card p-5 mt-6">
+          <h3 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('detail.slaReport')}</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wider">{t('detail.slaUptime')}</div>
+              <div className="text-lg font-bold text-emerald-400 mt-1 tabular-nums">{sla.uptime_percentage}%</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wider">{t('detail.slaDowntime')}</div>
+              <div className="text-lg font-bold text-red-400 mt-1 tabular-nums">{sla.downtime_minutes}{t('detail.slaMinutes')}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wider">{t('detail.slaAvgResponse')}</div>
+              <div className="text-lg font-bold text-zinc-100 mt-1 tabular-nums">{formatMs(sla.avg_response_time_ms)}</div>
+            </div>
+            <div>
+              <div className="text-[10px] text-zinc-600 uppercase tracking-wider">{t('detail.slaTarget')}</div>
+              <div className="text-lg font-bold text-zinc-100 mt-1 tabular-nums">{sla.sla_target || '99.9'}%</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Badge embed */}
       <div className="card p-4 mt-6">

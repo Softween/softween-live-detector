@@ -5,6 +5,12 @@ import { monitorRoutes } from './routes/monitors.routes';
 import { checkRoutes } from './routes/checks.routes';
 import { visitorRoutes } from './routes/visitor.routes';
 import { statusPageRoutes } from './routes/status-page.routes';
+import { heartbeatRoutes } from './routes/heartbeat.routes';
+import { apikeyRoutes } from './routes/apikey.routes';
+import { teamRoutes } from './routes/team.routes';
+import { incidentRoutes } from './routes/incident.routes';
+import { slaRoutes } from './routes/sla.routes';
+import { webhookRoutes } from './routes/webhook.routes';
 import { handleScheduled } from './cron/scheduled';
 import type { Env } from './env';
 
@@ -22,6 +28,12 @@ app.route('/api/monitors', monitorRoutes);
 app.route('/api/checks', checkRoutes);
 app.route('/api/visitor', visitorRoutes);
 app.route('/api/status-page', statusPageRoutes);
+app.route('/api/heartbeat', heartbeatRoutes);
+app.route('/api/apikeys', apikeyRoutes);
+app.route('/api/teams', teamRoutes);
+app.route('/api/incidents', incidentRoutes);
+app.route('/api/sla', slaRoutes);
+app.route('/api/webhooks', webhookRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

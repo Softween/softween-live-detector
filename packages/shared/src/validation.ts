@@ -36,6 +36,11 @@ export const createMonitorSchema = z.object({
   expected_status: z.number().int().min(100).max(599).optional().default(200),
   timeout_ms: z.number().int().min(1000).max(30000).optional().default(10000),
   check_keyword: z.string().max(500).optional().or(z.literal('')),
+  check_interval_seconds: z.number().int().min(60).max(600).optional().default(300),
+  custom_headers: z.string().max(5000).optional().or(z.literal('')),
+  monitor_type: z.enum(['http', 'tcp', 'dns', 'ping']).optional().default('http'),
+  port: z.number().int().min(1).max(65535).optional().or(z.null()),
+  check_regions: z.string().max(200).optional().default('auto'),
 });
 
 export const updateMonitorSchema = z.object({
@@ -47,6 +52,11 @@ export const updateMonitorSchema = z.object({
   check_keyword: z.string().max(500).optional().or(z.literal('')).or(z.null()),
   maintenance_start: z.string().optional().or(z.literal('')).or(z.null()),
   maintenance_end: z.string().optional().or(z.literal('')).or(z.null()),
+  check_interval_seconds: z.number().int().min(60).max(600).optional(),
+  custom_headers: z.string().max(5000).optional().or(z.literal('')).or(z.null()),
+  monitor_type: z.enum(['http', 'tcp', 'dns', 'ping']).optional(),
+  port: z.number().int().min(1).max(65535).optional().or(z.null()),
+  check_regions: z.string().max(200).optional(),
 });
 
 export const updateNotificationSettingsSchema = z.object({
@@ -56,6 +66,10 @@ export const updateNotificationSettingsSchema = z.object({
   webhook_enabled: z.boolean().optional(),
   slow_threshold_ms: z.number().int().min(100).max(60000).optional().or(z.null()),
   slow_alert_enabled: z.boolean().optional(),
+  telegram_bot_token: z.string().max(200).optional().or(z.literal('')),
+  telegram_chat_id: z.string().max(100).optional().or(z.literal('')),
+  telegram_enabled: z.boolean().optional(),
+  weekly_report_enabled: z.boolean().optional(),
 });
 
 export const updateStatusPageSchema = z.object({
@@ -64,6 +78,44 @@ export const updateStatusPageSchema = z.object({
   description: z.string().max(500).optional().or(z.literal('')),
   is_public: z.boolean(),
   monitor_ids: z.array(z.string()).max(20),
+});
+
+export const createHeartbeatSchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(100),
+  expected_interval_seconds: z.number().int().min(60).max(86400).optional().default(300),
+  grace_period_seconds: z.number().int().min(0).max(3600).optional().default(60),
+});
+
+export const updateHeartbeatSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  expected_interval_seconds: z.number().int().min(60).max(86400).optional(),
+  grace_period_seconds: z.number().int().min(0).max(3600).optional(),
+});
+
+export const createApiKeySchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(100),
+});
+
+export const createTeamSchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(100),
+});
+
+export const inviteTeamMemberSchema = z.object({
+  email: z.string().email('Geçerli bir email adresi girin'),
+  role: z.enum(['admin', 'viewer']).optional().default('viewer'),
+});
+
+export const incidentUpdateSchema = z.object({
+  status: z.enum(['investigating', 'identified', 'monitoring', 'resolved']),
+  message: z.string().min(1, 'Mesaj gerekli').max(2000),
+});
+
+export const subscribeStatusPageSchema = z.object({
+  email: z.string().email('Geçerli bir email adresi girin'),
+});
+
+export const verify2FASchema = z.object({
+  code: z.string().length(6, '6 haneli kod girin'),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
@@ -76,3 +128,11 @@ export type CreateMonitorInput = z.infer<typeof createMonitorSchema>;
 export type UpdateMonitorInput = z.infer<typeof updateMonitorSchema>;
 export type UpdateNotificationSettingsInput = z.infer<typeof updateNotificationSettingsSchema>;
 export type UpdateStatusPageInput = z.infer<typeof updateStatusPageSchema>;
+export type CreateHeartbeatInput = z.infer<typeof createHeartbeatSchema>;
+export type UpdateHeartbeatInput = z.infer<typeof updateHeartbeatSchema>;
+export type CreateApiKeyInput = z.infer<typeof createApiKeySchema>;
+export type CreateTeamInput = z.infer<typeof createTeamSchema>;
+export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
+export type IncidentUpdateInput = z.infer<typeof incidentUpdateSchema>;
+export type SubscribeStatusPageInput = z.infer<typeof subscribeStatusPageSchema>;
+export type Verify2FAInput = z.infer<typeof verify2FASchema>;

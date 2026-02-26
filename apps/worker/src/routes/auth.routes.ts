@@ -258,13 +258,13 @@ auth.delete('/account', authMiddleware, async (c) => {
 auth.get('/notifications', authMiddleware, async (c) => {
   const userId = c.get('userId');
   const settings = await c.env.DB.prepare(
-    'SELECT email_enabled, cooldown_minutes, webhook_url, webhook_enabled, slow_threshold_ms, slow_alert_enabled FROM notification_settings WHERE user_id = ?',
+    'SELECT email_enabled, cooldown_minutes, webhook_url, webhook_enabled, slow_threshold_ms, slow_alert_enabled, telegram_bot_token, telegram_chat_id, telegram_enabled, weekly_report_enabled FROM notification_settings WHERE user_id = ?',
   )
     .bind(userId)
-    .first<{ email_enabled: number; cooldown_minutes: number; webhook_url: string | null; webhook_enabled: number; slow_threshold_ms: number | null; slow_alert_enabled: number }>();
+    .first<{ email_enabled: number; cooldown_minutes: number; webhook_url: string | null; webhook_enabled: number; slow_threshold_ms: number | null; slow_alert_enabled: number; telegram_bot_token: string | null; telegram_chat_id: string | null; telegram_enabled: number; weekly_report_enabled: number }>();
 
   if (!settings) {
-    return c.json({ email_enabled: true, cooldown_minutes: 15, webhook_url: '', webhook_enabled: false, slow_threshold_ms: null, slow_alert_enabled: false });
+    return c.json({ email_enabled: true, cooldown_minutes: 15, webhook_url: '', webhook_enabled: false, slow_threshold_ms: null, slow_alert_enabled: false, telegram_bot_token: '', telegram_chat_id: '', telegram_enabled: false, weekly_report_enabled: false });
   }
 
   return c.json({
@@ -274,6 +274,10 @@ auth.get('/notifications', authMiddleware, async (c) => {
     webhook_enabled: settings.webhook_enabled === 1,
     slow_threshold_ms: settings.slow_threshold_ms,
     slow_alert_enabled: settings.slow_alert_enabled === 1,
+    telegram_bot_token: settings.telegram_bot_token || '',
+    telegram_chat_id: settings.telegram_chat_id || '',
+    telegram_enabled: settings.telegram_enabled === 1,
+    weekly_report_enabled: settings.weekly_report_enabled === 1,
   });
 });
 
@@ -290,11 +294,15 @@ auth.put('/notifications', authMiddleware, async (c) => {
   const webhookEnabled = parsed.data.webhook_enabled ? 1 : 0;
   const slowThreshold = parsed.data.slow_threshold_ms ?? null;
   const slowEnabled = parsed.data.slow_alert_enabled ? 1 : 0;
+  const telegramBotToken = parsed.data.telegram_bot_token || null;
+  const telegramChatId = parsed.data.telegram_chat_id || null;
+  const telegramEnabled = parsed.data.telegram_enabled ? 1 : 0;
+  const weeklyReportEnabled = parsed.data.weekly_report_enabled ? 1 : 0;
 
   await c.env.DB.prepare(
-    'UPDATE notification_settings SET email_enabled = ?, cooldown_minutes = ?, webhook_url = ?, webhook_enabled = ?, slow_threshold_ms = ?, slow_alert_enabled = ? WHERE user_id = ?',
+    'UPDATE notification_settings SET email_enabled = ?, cooldown_minutes = ?, webhook_url = ?, webhook_enabled = ?, slow_threshold_ms = ?, slow_alert_enabled = ?, telegram_bot_token = ?, telegram_chat_id = ?, telegram_enabled = ?, weekly_report_enabled = ? WHERE user_id = ?',
   )
-    .bind(parsed.data.email_enabled ? 1 : 0, parsed.data.cooldown_minutes, webhookUrl, webhookEnabled, slowThreshold, slowEnabled, userId)
+    .bind(parsed.data.email_enabled ? 1 : 0, parsed.data.cooldown_minutes, webhookUrl, webhookEnabled, slowThreshold, slowEnabled, telegramBotToken, telegramChatId, telegramEnabled, weeklyReportEnabled, userId)
     .run();
 
   return c.json({
@@ -304,6 +312,10 @@ auth.put('/notifications', authMiddleware, async (c) => {
     webhook_enabled: parsed.data.webhook_enabled || false,
     slow_threshold_ms: slowThreshold,
     slow_alert_enabled: parsed.data.slow_alert_enabled || false,
+    telegram_bot_token: telegramBotToken || '',
+    telegram_chat_id: telegramChatId || '',
+    telegram_enabled: parsed.data.telegram_enabled || false,
+    weekly_report_enabled: parsed.data.weekly_report_enabled || false,
   });
 });
 

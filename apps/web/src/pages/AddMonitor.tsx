@@ -12,15 +12,27 @@ const TIMEOUT_OPTIONS = [
   { value: 30000, key: 'timeout30' },
 ];
 
+const CHECK_INTERVAL_OPTIONS = [
+  { value: 60, key: 'interval60' },
+  { value: 120, key: 'interval120' },
+  { value: 300, key: 'interval300' },
+  { value: 600, key: 'interval600' },
+];
+
 export default function AddMonitor() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
+  const [monitorType, setMonitorType] = useState('http');
+  const [port, setPort] = useState('');
   const [method, setMethod] = useState('GET');
   const [expectedStatus, setExpectedStatus] = useState(200);
   const [timeout, setTimeout] = useState(10000);
+  const [checkInterval, setCheckInterval] = useState(300);
   const [keyword, setKeyword] = useState('');
+  const [customHeaders, setCustomHeaders] = useState('');
+  const [checkRegions, setCheckRegions] = useState('auto');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -37,7 +49,12 @@ export default function AddMonitor() {
         expected_status: expectedStatus,
         timeout_ms: timeout,
         check_keyword: keyword || undefined,
-      });
+        monitor_type: monitorType,
+        port: monitorType === 'tcp' && port ? parseInt(port, 10) : undefined,
+        check_interval_seconds: checkInterval,
+        custom_headers: customHeaders || undefined,
+        check_regions: checkRegions,
+      } as any);
       toast.success(t('monitor.createSuccess'));
 
       // Trigger first ping immediately
@@ -75,6 +92,15 @@ export default function AddMonitor() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Monitor Type */}
+        <div>
+          <label className="label">{t('monitor.monitorType')}</label>
+          <select value={monitorType} onChange={(e) => setMonitorType(e.target.value)} className="input">
+            <option value="http">HTTP</option>
+            <option value="tcp">TCP</option>
+          </select>
+        </div>
+
         <div>
           <label className="label">{t('monitor.name')}</label>
           <input
@@ -89,34 +115,55 @@ export default function AddMonitor() {
         <div>
           <label className="label">{t('monitor.url')}</label>
           <input
-            type="url"
+            type={monitorType === 'http' ? 'url' : 'text'}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            placeholder={t('monitor.urlPlaceholder')}
+            placeholder={monitorType === 'http' ? t('monitor.urlPlaceholder') : t('monitor.hostPlaceholder')}
             required
             className="input"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+
+        {/* Port (TCP only) */}
+        {monitorType === 'tcp' && (
           <div>
-            <label className="label">{t('monitor.httpMethod')}</label>
-            <select value={method} onChange={(e) => setMethod(e.target.value)} className="input">
-              <option value="GET">GET</option>
-              <option value="HEAD">HEAD</option>
-            </select>
-          </div>
-          <div>
-            <label className="label">{t('monitor.expectedStatus')}</label>
+            <label className="label">{t('monitor.port')}</label>
             <input
               type="number"
-              value={expectedStatus}
-              onChange={(e) => setExpectedStatus(parseInt(e.target.value, 10))}
-              min={100}
-              max={599}
+              value={port}
+              onChange={(e) => setPort(e.target.value)}
+              placeholder="443"
+              min={1}
+              max={65535}
+              required
               className="input"
             />
           </div>
-        </div>
+        )}
+
+        {monitorType === 'http' && (
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="label">{t('monitor.httpMethod')}</label>
+              <select value={method} onChange={(e) => setMethod(e.target.value)} className="input">
+                <option value="GET">GET</option>
+                <option value="HEAD">HEAD</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">{t('monitor.expectedStatus')}</label>
+              <input
+                type="number"
+                value={expectedStatus}
+                onChange={(e) => setExpectedStatus(parseInt(e.target.value, 10))}
+                min={100}
+                max={599}
+                className="input"
+              />
+            </div>
+          </div>
+        )}
+
         <div>
           <label className="label">{t('monitor.timeout')}</label>
           <select value={timeout} onChange={(e) => setTimeout(parseInt(e.target.value, 10))} className="input">
@@ -128,17 +175,60 @@ export default function AddMonitor() {
           </select>
           <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.timeoutHint')}</p>
         </div>
+
+        {/* Check Interval */}
         <div>
-          <label className="label">{t('monitor.keyword')}</label>
-          <input
-            type="text"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            placeholder={t('monitor.keywordPlaceholder')}
-            className="input"
-          />
-          <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.keywordHint')}</p>
+          <label className="label">{t('monitor.checkInterval')}</label>
+          <select value={checkInterval} onChange={(e) => setCheckInterval(parseInt(e.target.value, 10))} className="input">
+            {CHECK_INTERVAL_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {t(`monitor.${opt.key}`)}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.checkIntervalHint')}</p>
         </div>
+
+        {monitorType === 'http' && (
+          <div>
+            <label className="label">{t('monitor.keyword')}</label>
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder={t('monitor.keywordPlaceholder')}
+              className="input"
+            />
+            <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.keywordHint')}</p>
+          </div>
+        )}
+
+        {/* Custom Headers (HTTP only) */}
+        {monitorType === 'http' && (
+          <div>
+            <label className="label">{t('monitor.customHeaders')}</label>
+            <textarea
+              value={customHeaders}
+              onChange={(e) => setCustomHeaders(e.target.value)}
+              placeholder={'{"Authorization": "Bearer token"}'}
+              rows={3}
+              className="input resize-none"
+            />
+            <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.customHeadersHint')}</p>
+          </div>
+        )}
+
+        {/* Check Regions */}
+        <div>
+          <label className="label">{t('monitor.checkRegions')}</label>
+          <select value={checkRegions} onChange={(e) => setCheckRegions(e.target.value)} className="input">
+            <option value="auto">{t('monitor.regionAuto')}</option>
+            <option value="us">{t('monitor.regionUs')}</option>
+            <option value="eu">{t('monitor.regionEu')}</option>
+            <option value="asia">{t('monitor.regionAsia')}</option>
+          </select>
+        </div>
+
         <div className="flex gap-3 pt-3">
           <button type="submit" disabled={loading} className="btn-primary">
             {loading ? t('monitor.creating') : t('monitor.createButton')}

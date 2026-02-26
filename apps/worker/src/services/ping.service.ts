@@ -17,6 +17,9 @@ interface MonitorRow {
   timeout_ms: number;
   current_status: string;
   check_keyword: string | null;
+  custom_headers: string | null;
+  monitor_type: string;
+  port: number | null;
 }
 
 export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
@@ -24,6 +27,59 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
   const startTime = Date.now();
 
   try {
+    let extraHeaders: Record<string, string> = {};
+    if (monitor.custom_headers) {
+      try { extraHeaders = JSON.parse(monitor.custom_headers); } catch {}
+    }
+
+    // TCP monitoring: use fetch to the URL with port as a basic connectivity test
+    if (monitor.monitor_type === 'tcp') {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), monitor.timeout_ms || 10000);
+
+      let tcpUrl = monitor.url;
+      if (monitor.port) {
+        const urlObj = new URL(monitor.url);
+        urlObj.port = String(monitor.port);
+        tcpUrl = urlObj.toString();
+      }
+
+      try {
+        const tcpResponse = await fetch(tcpUrl, {
+          method: 'HEAD',
+          signal: controller.signal,
+          headers: { 'User-Agent': 'SoftweenLiveChecker/1.0', ...extraHeaders },
+        });
+        clearTimeout(timeoutId);
+        const responseTime = Date.now() - startTime;
+
+        return {
+          id,
+          monitorId: monitor.id,
+          status: 'up',
+          statusCode: tcpResponse.status,
+          responseTime,
+          error: null,
+          previousStatus: monitor.current_status,
+          statusChanged:
+            monitor.current_status !== 'unknown' && 'up' !== monitor.current_status,
+        };
+      } catch (tcpErr: unknown) {
+        clearTimeout(timeoutId);
+        const message = tcpErr instanceof Error ? tcpErr.message : 'TCP connection failed';
+        return {
+          id,
+          monitorId: monitor.id,
+          status: 'down',
+          statusCode: null,
+          responseTime: null,
+          error: message,
+          previousStatus: monitor.current_status,
+          statusChanged: monitor.current_status === 'up',
+        };
+      }
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), monitor.timeout_ms || 10000);
 
@@ -32,6 +88,7 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
       signal: controller.signal,
       headers: {
         'User-Agent': 'SoftweenLiveChecker/1.0',
+        ...extraHeaders,
       },
       redirect: 'follow',
     });

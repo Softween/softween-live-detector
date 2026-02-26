@@ -1,6 +1,22 @@
 import { sendEmail, buildDownEmailHtml, buildUpEmailHtml, buildSlowResponseEmailHtml } from '../lib/resend';
 import type { Env } from '../env';
 
+async function sendTelegramMessage(botToken: string, chatId: string, text: string): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `https://api.telegram.org/bot${botToken}/sendMessage`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+      },
+    );
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 export async function sendStatusNotification(
   monitorId: string,
   type: 'down' | 'up',
@@ -8,7 +24,8 @@ export async function sendStatusNotification(
   env: Env,
 ): Promise<void> {
   const monitor = await env.DB.prepare(
-    `SELECT m.name, m.url, m.user_id, u.email, ns.email_enabled, ns.cooldown_minutes, ns.webhook_url, ns.webhook_enabled
+    `SELECT m.name, m.url, m.user_id, u.email, ns.email_enabled, ns.cooldown_minutes, ns.webhook_url, ns.webhook_enabled,
+            ns.telegram_enabled, ns.telegram_bot_token, ns.telegram_chat_id
      FROM monitors m
      JOIN users u ON m.user_id = u.id
      LEFT JOIN notification_settings ns ON u.id = ns.user_id
@@ -24,6 +41,9 @@ export async function sendStatusNotification(
       cooldown_minutes: number | null;
       webhook_url: string | null;
       webhook_enabled: number | null;
+      telegram_enabled: number | null;
+      telegram_bot_token: string | null;
+      telegram_chat_id: string | null;
     }>();
 
   if (!monitor) return;
@@ -89,6 +109,14 @@ export async function sendStatusNotification(
       });
     } catch { /* webhook is best-effort */ }
   }
+
+  // Telegram notification
+  if (monitor.telegram_enabled === 1 && monitor.telegram_bot_token && monitor.telegram_chat_id) {
+    const text = type === 'down'
+      ? `🔴 <b>${monitor.name}</b> is DOWN\n${monitor.url}\n${errorMessage || 'Unknown error'}`
+      : `🟢 <b>${monitor.name}</b> is back UP\n${monitor.url}`;
+    await sendTelegramMessage(monitor.telegram_bot_token, monitor.telegram_chat_id, text);
+  }
 }
 
 export async function sendSlowResponseNotification(
@@ -99,7 +127,8 @@ export async function sendSlowResponseNotification(
   const monitor = await env.DB.prepare(
     `SELECT m.name, m.url, m.user_id, u.email,
             ns.email_enabled, ns.cooldown_minutes, ns.webhook_url, ns.webhook_enabled,
-            ns.slow_threshold_ms, ns.slow_alert_enabled
+            ns.slow_threshold_ms, ns.slow_alert_enabled,
+            ns.telegram_enabled, ns.telegram_bot_token, ns.telegram_chat_id
      FROM monitors m
      JOIN users u ON m.user_id = u.id
      LEFT JOIN notification_settings ns ON u.id = ns.user_id
@@ -117,6 +146,9 @@ export async function sendSlowResponseNotification(
       webhook_enabled: number | null;
       slow_threshold_ms: number | null;
       slow_alert_enabled: number | null;
+      telegram_enabled: number | null;
+      telegram_bot_token: string | null;
+      telegram_chat_id: string | null;
     }>();
 
   if (!monitor) return;
@@ -167,5 +199,11 @@ export async function sendSlowResponseNotification(
         }),
       });
     } catch { /* webhook is best-effort */ }
+  }
+
+  // Telegram notification for slow response
+  if (monitor.telegram_enabled === 1 && monitor.telegram_bot_token && monitor.telegram_chat_id) {
+    const text = `🟡 <b>${monitor.name}</b> is SLOW\n${monitor.url}\nResponse time: ${responseTime}ms (threshold: ${monitor.slow_threshold_ms}ms)`;
+    await sendTelegramMessage(monitor.telegram_bot_token, monitor.telegram_chat_id, text);
   }
 }

@@ -6,6 +6,7 @@ import ErrorBoundary from './components/ui/ErrorBoundary';
 import NotFound from './components/ui/NotFound';
 import Spinner from './components/ui/Spinner';
 import VisitorFooter from './components/ui/VisitorFooter';
+import { ThemeProvider } from './context/ThemeContext';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Login = lazy(() => import('./pages/Login'));
@@ -19,6 +20,9 @@ const AddMonitor = lazy(() => import('./pages/AddMonitor'));
 const EditMonitor = lazy(() => import('./pages/EditMonitor'));
 const Settings = lazy(() => import('./pages/Settings'));
 const StatusPage = lazy(() => import('./pages/StatusPage'));
+const Heartbeats = lazy(() => import('./pages/Heartbeats'));
+const ApiKeys = lazy(() => import('./pages/ApiKeys'));
+const Teams = lazy(() => import('./pages/Teams'));
 
 function PageLoader() {
   return (
@@ -43,26 +47,31 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <ErrorBoundary>
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/verify-email" element={<VerifyEmail />} />
-          <Route path="/status/:slug" element={<StatusPage />} />
-          <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/monitors/new" element={<AddMonitor />} />
-            <Route path="/monitors/:id" element={<MonitorDetail />} />
-            <Route path="/monitors/:id/edit" element={<EditMonitor />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <VisitorFooter />
-      </Suspense>
+      <ThemeProvider>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/status/:slug" element={<StatusPage />} />
+            <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/monitors/new" element={<AddMonitor />} />
+              <Route path="/monitors/:id" element={<MonitorDetail />} />
+              <Route path="/monitors/:id/edit" element={<EditMonitor />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/heartbeats" element={<Heartbeats />} />
+              <Route path="/api-keys" element={<ApiKeys />} />
+              <Route path="/teams" element={<Teams />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <VisitorFooter />
+        </Suspense>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

@@ -32,6 +32,11 @@ export async function createMonitor(
     expected_status: number;
     timeout_ms: number;
     check_keyword?: string;
+    check_interval_seconds?: number;
+    custom_headers?: string;
+    monitor_type?: string;
+    port?: number;
+    check_regions?: string;
   },
 ): Promise<Monitor> {
   // Check monitor limit
@@ -49,10 +54,24 @@ export async function createMonitor(
   const keyword = data.check_keyword || null;
 
   await env.DB.prepare(
-    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms, check_keyword)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms, check_keyword, check_interval_seconds, custom_headers, monitor_type, port, check_regions)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
-    .bind(id, userId, data.name, data.url, data.method, data.expected_status, data.timeout_ms, keyword)
+    .bind(
+      id,
+      userId,
+      data.name,
+      data.url,
+      data.method,
+      data.expected_status,
+      data.timeout_ms,
+      keyword,
+      data.check_interval_seconds || 60,
+      data.custom_headers || null,
+      data.monitor_type || 'http',
+      data.port || null,
+      data.check_regions || null,
+    )
     .run();
 
   return (await env.DB.prepare('SELECT * FROM monitors WHERE id = ?').bind(id).first<Monitor>())!;
@@ -71,6 +90,11 @@ export async function updateMonitor(
     check_keyword: string | null;
     maintenance_start: string | null;
     maintenance_end: string | null;
+    check_interval_seconds: number;
+    custom_headers: string | null;
+    monitor_type: string;
+    port: number | null;
+    check_regions: string | null;
   }>,
 ): Promise<Monitor | null> {
   const existing = await getMonitor(env, monitorId, userId);
@@ -110,6 +134,26 @@ export async function updateMonitor(
   if (data.maintenance_end !== undefined) {
     fields.push('maintenance_end = ?');
     values.push(data.maintenance_end || null);
+  }
+  if (data.check_interval_seconds !== undefined) {
+    fields.push('check_interval_seconds = ?');
+    values.push(data.check_interval_seconds);
+  }
+  if (data.custom_headers !== undefined) {
+    fields.push('custom_headers = ?');
+    values.push(data.custom_headers || null);
+  }
+  if (data.monitor_type !== undefined) {
+    fields.push('monitor_type = ?');
+    values.push(data.monitor_type);
+  }
+  if (data.port !== undefined) {
+    fields.push('port = ?');
+    values.push(data.port);
+  }
+  if (data.check_regions !== undefined) {
+    fields.push('check_regions = ?');
+    values.push(data.check_regions || null);
   }
 
   if (fields.length === 0) return existing;

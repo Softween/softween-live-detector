@@ -17,7 +17,12 @@ export default function Settings() {
   const [webhookEnabled, setWebhookEnabled] = useState(false);
   const [slowThreshold, setSlowThreshold] = useState('');
   const [slowEnabled, setSlowEnabled] = useState(false);
+  const [telegramToken, setTelegramToken] = useState('');
+  const [telegramChatId, setTelegramChatId] = useState('');
+  const [telegramEnabled, setTelegramEnabled] = useState(false);
+  const [weeklyReportEnabled, setWeeklyReportEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [webhookTesting, setWebhookTesting] = useState(false);
 
   // Password change state
   const [currentPassword, setCurrentPassword] = useState('');
@@ -51,6 +56,10 @@ export default function Settings() {
       setWebhookEnabled(settings.webhook_enabled);
       setSlowThreshold(settings.slow_threshold_ms ? String(settings.slow_threshold_ms) : '');
       setSlowEnabled(settings.slow_alert_enabled);
+      setTelegramToken((settings as any).telegram_bot_token || '');
+      setTelegramChatId((settings as any).telegram_chat_id || '');
+      setTelegramEnabled((settings as any).telegram_enabled ?? false);
+      setWeeklyReportEnabled((settings as any).weekly_report_enabled ?? false);
     }).catch(() => {});
 
     api.monitors.list().then(setMonitors).catch(() => {});
@@ -77,12 +86,28 @@ export default function Settings() {
         webhook_enabled: webhookEnabled,
         slow_threshold_ms: slowEnabled && slowThreshold ? parseInt(slowThreshold, 10) : null,
         slow_alert_enabled: slowEnabled,
-      });
+        telegram_bot_token: telegramToken || '',
+        telegram_chat_id: telegramChatId || '',
+        telegram_enabled: telegramEnabled,
+        weekly_report_enabled: weeklyReportEnabled,
+      } as any);
       toast.success(t('settings.saveSuccess'));
     } catch {
       toast.error(t('settings.saveError'));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleWebhookTest() {
+    setWebhookTesting(true);
+    try {
+      await (api as any).webhooks.test();
+      toast.success(t('settings.webhookTestSuccess'));
+    } catch {
+      toast.error(t('settings.webhookTestFailed'));
+    } finally {
+      setWebhookTesting(false);
     }
   }
 
@@ -314,16 +339,83 @@ export default function Settings() {
             {webhookEnabled && (
               <div>
                 <label className="label">{t('settings.webhookUrl')}</label>
-                <input
-                  type="url"
-                  value={webhookUrl}
-                  onChange={(e) => setWebhookUrl(e.target.value)}
-                  placeholder="https://discord.com/api/webhooks/..."
-                  className="input"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="url"
+                    value={webhookUrl}
+                    onChange={(e) => setWebhookUrl(e.target.value)}
+                    placeholder="https://discord.com/api/webhooks/..."
+                    className="input"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleWebhookTest}
+                    disabled={webhookTesting || !webhookUrl}
+                    className="btn-secondary text-xs flex-shrink-0"
+                  >
+                    {webhookTesting ? t('common.loading') : t('settings.webhookTest')}
+                  </button>
+                </div>
                 <p className="text-xs text-zinc-600 mt-1.5">{t('settings.webhookHint')}</p>
               </div>
             )}
+          </div>
+
+          {/* Telegram */}
+          <div className="border-t border-white/[0.06] pt-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-sm font-medium text-zinc-200">{t('settings.telegramTitle')}</div>
+                <div className="text-xs text-zinc-500 mt-0.5">{t('settings.telegramDesc')}</div>
+              </div>
+              <button
+                onClick={() => setTelegramEnabled(!telegramEnabled)}
+                className={`relative w-10 h-5 rounded-full transition-colors duration-150 ${telegramEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
+              >
+                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-150 ${telegramEnabled ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
+            {telegramEnabled && (
+              <div className="space-y-4">
+                <div>
+                  <label className="label">{t('settings.telegramToken')}</label>
+                  <input
+                    type="text"
+                    value={telegramToken}
+                    onChange={(e) => setTelegramToken(e.target.value)}
+                    placeholder="123456:ABC-DEF..."
+                    className="input"
+                  />
+                  <p className="text-xs text-zinc-600 mt-1.5">{t('settings.telegramTokenHint')}</p>
+                </div>
+                <div>
+                  <label className="label">{t('settings.telegramChatId')}</label>
+                  <input
+                    type="text"
+                    value={telegramChatId}
+                    onChange={(e) => setTelegramChatId(e.target.value)}
+                    placeholder="-1001234567890"
+                    className="input"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Weekly Report */}
+          <div className="border-t border-white/[0.06] pt-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium text-zinc-200">{t('settings.weeklyReport')}</div>
+                <div className="text-xs text-zinc-500 mt-0.5">{t('settings.weeklyReportDesc')}</div>
+              </div>
+              <button
+                onClick={() => setWeeklyReportEnabled(!weeklyReportEnabled)}
+                className={`relative w-10 h-5 rounded-full transition-colors duration-150 ${weeklyReportEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
+              >
+                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-150 ${weeklyReportEnabled ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
           </div>
 
           <button onClick={handleSave} disabled={loading} className="btn-primary">

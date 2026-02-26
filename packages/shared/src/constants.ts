@@ -1,4 +1,6 @@
 export const MAX_MONITORS_PER_USER = 10;
+export const MAX_HEARTBEATS_PER_USER = 5;
+export const MAX_API_KEYS_PER_USER = 5;
 export const DEFAULT_CHECK_INTERVAL_SECONDS = 300;
 export const DEFAULT_TIMEOUT_MS = 10000;
 export const DEFAULT_COOLDOWN_MINUTES = 15;
@@ -6,3 +8,9 @@ export const DATA_RETENTION_DAYS = 30;
 export const NOTIFICATION_LOG_RETENTION_DAYS = 90;
 export const CRON_BATCH_SIZE = 25;
 export const JWT_EXPIRY_SECONDS = 7 * 24 * 60 * 60; // 7 days
+export const SSL_WARN_DAYS = [30, 7, 1]; // Days before expiry to warn
+export const DOMAIN_WARN_DAYS = [30, 7, 1];
+export const CHECK_REGIONS = ['auto', 'us', 'eu', 'asia'] as const;
+export const MONITOR_TYPES = ['http', 'tcp', 'dns', 'ping'] as const;
+export const INCIDENT_STATUSES = ['investigating', 'identified', 'monitoring', 'resolved'] as const;
+export const TEAM_ROLES = ['owner', 'admin', 'viewer'] as const;
