@@ -21,7 +21,7 @@
   ],
   "vars": {
     "ENVIRONMENT": "production",
-    "FRONTEND_URL": "https://softween-live-checker.pages.dev"
+    "FRONTEND_URL": "https://livedetector.softween.com"
   },
   "triggers": {
     "crons": ["*/5 * * * *"]
