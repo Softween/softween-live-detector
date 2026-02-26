@@ -4,7 +4,7 @@ import LanguageSwitcher from '../components/ui/LanguageSwitcher';
 import { useSEO } from '../hooks/useSEO';
 
 export default function Landing() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useSEO({
     title: 'Free Uptime Monitoring & Status Pages',
@@ -121,7 +121,33 @@ export default function Landing() {
           ))}
         </div>
 
-        <p className="mt-20 text-xs text-zinc-600">{t('landing.trustedBy')}</p>
+        {/* Turkey Dashboard Banner */}
+        <Link
+          to="/turkiye"
+          className="group mt-16 block rounded-xl border border-violet-500/20 bg-violet-500/[0.04] hover:bg-violet-500/[0.08] hover:border-violet-500/30 transition-all duration-300 p-5 text-center"
+        >
+          <div className="flex items-center justify-center gap-2 mb-1.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="text-sm font-medium text-zinc-200 group-hover:text-zinc-100 transition-colors">
+              {i18n.language === 'tr'
+                ? "T\u00fcrkiye'nin en pop\u00fcler sitelerinin durumunu g\u00f6r\u00fcn"
+                : "View the status of Turkey's most popular websites"}
+            </span>
+            <svg className="w-4 h-4 text-violet-400 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+            </svg>
+          </div>
+          <p className="text-xs text-zinc-500">
+            {i18n.language === 'tr'
+              ? 'E-ticaret, bankac\u0131l\u0131k, sosyal medya ve daha fazlas\u0131'
+              : 'E-commerce, banking, social media and more'}
+          </p>
+        </Link>
+
+        <p className="mt-12 text-xs text-zinc-600">{t('landing.trustedBy')}</p>
       </main>
     </div>
   );

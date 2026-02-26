@@ -1,4 +1,4 @@
-import { DATA_RETENTION_DAYS, NOTIFICATION_LOG_RETENTION_DAYS } from 'shared';
+import { DATA_RETENTION_DAYS, NOTIFICATION_LOG_RETENTION_DAYS, TURKEY_DATA_RETENTION_DAYS } from 'shared';
 import type { Env } from '../env';
 
 export async function runCleanup(env: Env): Promise<void> {
@@ -15,6 +15,12 @@ export async function runCleanup(env: Env): Promise<void> {
     ),
     env.DB.prepare(
       `DELETE FROM notification_log WHERE sent_at < datetime('now', '-${NOTIFICATION_LOG_RETENTION_DAYS} days')`,
+    ),
+    env.DB.prepare(
+      `DELETE FROM turkey_checks WHERE checked_at < datetime('now', '-${TURKEY_DATA_RETENTION_DAYS} days')`,
+    ),
+    env.DB.prepare(
+      `DELETE FROM trends_cache WHERE fetched_at < datetime('now', '-${TURKEY_DATA_RETENTION_DAYS} days')`,
     ),
   ]);
 

@@ -1,9 +1,12 @@
-import { CRON_BATCH_SIZE } from 'shared';
+import { CRON_BATCH_SIZE, TURKEY_BATCH_SIZE } from 'shared';
 import { pingMonitor, type PingResult } from '../services/ping.service';
 import { sendStatusNotification, sendSlowResponseNotification } from '../services/notification.service';
 import { runCleanup } from '../services/cleanup.service';
 import { checkExpiredHeartbeats } from '../services/heartbeat.service';
 import { checkSSLExpiry } from '../services/ssl.service';
+import { pingTurkeySite } from '../services/turkey-ping.service';
+import { seedTurkeySites } from '../services/turkey-seed.service';
+import { generateWeeklyBlogContent } from '../services/blog.service';
 import type { Env } from '../env';
 
 interface MonitorRow {
@@ -110,6 +113,78 @@ export async function handleScheduled(
   if (lastSslCheck !== today) {
     await checkSSLExpiry(env);
     await env.KV.put('cron:last_ssl_check', today);
+  }
+
+  // 11. Turkey site monitoring
+  await handleTurkeyChecks(env);
+
+  // 12. Weekly blog generation (runs on Saturdays around 03:00 UTC)
+  const now = new Date();
+  const lastBlogGen = await env.KV.get('cron:last_blog_gen');
+  const weekKey = `${now.getFullYear()}-W${Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)}`;
+  if (lastBlogGen !== weekKey && now.getUTCDay() === 6 && now.getUTCHours() >= 3) {
+    await generateWeeklyBlogContent(env);
+    await env.KV.put('cron:last_blog_gen', weekKey);
+  }
+}
+
+async function handleTurkeyChecks(env: Env): Promise<void> {
+  // Ensure sites are seeded
+  await seedTurkeySites(env);
+
+  const sites = await env.DB.prepare(
+    'SELECT id, name, url, current_status FROM turkey_sites WHERE is_active = 1',
+  ).all<{ id: string; name: string; url: string; current_status: string }>();
+
+  if (!sites.results.length) return;
+
+  // Round-robin batching
+  const offsetStr = await env.KV.get('cron:turkey_offset');
+  let offset = offsetStr ? parseInt(offsetStr, 10) : 0;
+  if (offset >= sites.results.length) offset = 0;
+
+  const batch = sites.results.slice(offset, offset + TURKEY_BATCH_SIZE);
+  const nextOffset = offset + TURKEY_BATCH_SIZE >= sites.results.length ? 0 : offset + TURKEY_BATCH_SIZE;
+  await env.KV.put('cron:turkey_offset', String(nextOffset));
+
+  // Ping all sites in batch
+  const results = await Promise.all(batch.map((site) => pingTurkeySite(site)));
+
+  // Batch insert checks
+  if (results.length > 0) {
+    const insertStmt = env.DB.prepare(
+      'INSERT INTO turkey_checks (id, site_id, status, status_code, response_time_ms, error_message) VALUES (?, ?, ?, ?, ?, ?)',
+    );
+    const insertBatch = results.map((r) =>
+      insertStmt.bind(crypto.randomUUID(), r.siteId, r.status, r.statusCode, r.responseTime, r.error),
+    );
+    await env.DB.batch(insertBatch);
+  }
+
+  // Batch update site statuses
+  const updateStmt = env.DB.prepare(
+    "UPDATE turkey_sites SET current_status = ?, last_response_time_ms = ?, last_checked_at = datetime('now') WHERE id = ?",
+  );
+  const updateBatch = results.map((r) =>
+    updateStmt.bind(r.status, r.responseTime, r.siteId),
+  );
+  await env.DB.batch(updateBatch);
+
+  // Handle status changes - create/resolve incidents
+  for (const result of results) {
+    if (result.previousStatus === 'up' && result.status === 'down') {
+      await env.DB.prepare(
+        'INSERT INTO turkey_incidents (id, site_id, cause) VALUES (?, ?, ?)',
+      )
+        .bind(crypto.randomUUID(), result.siteId, result.error)
+        .run();
+    } else if (result.previousStatus === 'down' && result.status === 'up') {
+      await env.DB.prepare(
+        "UPDATE turkey_incidents SET resolved_at = datetime('now') WHERE site_id = ? AND resolved_at IS NULL",
+      )
+        .bind(result.siteId)
+        .run();
+    }
   }
 }
 

@@ -11,6 +11,8 @@ import { teamRoutes } from './routes/team.routes';
 import { incidentRoutes } from './routes/incident.routes';
 import { slaRoutes } from './routes/sla.routes';
 import { webhookRoutes } from './routes/webhook.routes';
+import { turkeyRoutes } from './routes/turkey.routes';
+import { blogRoutes } from './routes/blog.routes';
 import { handleScheduled } from './cron/scheduled';
 import type { Env } from './env';
 
@@ -34,6 +36,8 @@ app.route('/api/teams', teamRoutes);
 app.route('/api/incidents', incidentRoutes);
 app.route('/api/sla', slaRoutes);
 app.route('/api/webhooks', webhookRoutes);
+app.route('/api/turkey', turkeyRoutes);
+app.route('/api/blog', blogRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

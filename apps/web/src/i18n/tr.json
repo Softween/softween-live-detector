@@ -22,6 +22,7 @@
     "heartbeats": "Heartbeat",
     "settings": "Ayarlar",
     "logout": "\u00c7\u0131k\u0131\u015f",
+    "turkey": "T\u00fcrkiye",
     "menu": "Men\u00fc"
   },
   "landing": {
@@ -377,5 +378,40 @@
     "noTeam": "Hen\u00fcz ekip yok",
     "noTeamDesc": "\u0130zleme konusunda ba\u015fkalar\u0131yla i\u015fbirli\u011fi yapmak i\u00e7in bir ekip olu\u015fturun.",
     "pendingInvite": "Bekliyor"
+  },
+  "turkey": {
+    "title": "T\u00fcrkiye Site Durum Paneli",
+    "subtitle": "T\u00fcrkiye'nin en pop\u00fcler sitelerinin anl\u0131k durumu",
+    "allUp": "T\u00fcm Siteler \u00c7al\u0131\u015f\u0131yor",
+    "someDown": "Baz\u0131 Siteler Eri\u015filemiyor",
+    "majorOutage": "B\u00fcy\u00fck Kesinti Tespit Edildi",
+    "lastUpdated": "Son g\u00fcncelleme",
+    "responseTime": "Yan\u0131t S\u00fcresi",
+    "uptime30d": "30 G\u00fcn Uptime",
+    "sitesMonitored": "Site \u0130zleniyor",
+    "sitesUp": "Aktif",
+    "sitesDown": "Down",
+    "avgResponse": "Ort. Yan\u0131t",
+    "recentIncidents": "Son Kesintiler",
+    "noIncidents": "Son 7 g\u00fcnde kesinti yok",
+    "monitorYourSite": "Kendi sitenizi \u00fccretsiz izleyin",
+    "duration": "S\u00fcre",
+    "ongoing": "Devam Ediyor",
+    "poweredBy": "LiveDetector ile izleniyor"
+  },
+  "blog": {
+    "title": "Blog",
+    "allPosts": "T\u00fcm\u00fc",
+    "trends": "Trendler",
+    "outages": "Kesintiler",
+    "analysis": "Analizler",
+    "general": "Genel",
+    "readMore": "Devam\u0131n\u0131 Oku",
+    "publishedAt": "Yay\u0131nlanma",
+    "relatedPosts": "\u0130lgili Yaz\u0131lar",
+    "sharePost": "Bu yaz\u0131y\u0131 payla\u015f",
+    "noPosts": "Hen\u00fcz blog yaz\u0131s\u0131 yok",
+    "backToBlog": "Blog'a D\u00f6n",
+    "views": "g\u00f6r\u00fcnt\u00fclenme"
   }
 }

@@ -14,3 +14,24 @@ export const CHECK_REGIONS = ['auto', 'us', 'eu', 'asia'] as const;
 export const MONITOR_TYPES = ['http', 'tcp', 'dns', 'ping'] as const;
 export const INCIDENT_STATUSES = ['investigating', 'identified', 'monitoring', 'resolved'] as const;
 export const TEAM_ROLES = ['owner', 'admin', 'viewer'] as const;
+
+// Turkey Dashboard
+export const TURKEY_BATCH_SIZE = 15;
+export const TURKEY_CHECK_TIMEOUT_MS = 5000;
+export const TURKEY_DATA_RETENTION_DAYS = 90;
+export const TURKEY_CATEGORIES = ['ecommerce', 'banking', 'social', 'news', 'gov', 'telecom', 'food', 'travel', 'tech'] as const;
+export const TURKEY_CATEGORY_LABELS: Record<string, { tr: string; en: string }> = {
+  ecommerce: { tr: 'E-Ticaret', en: 'E-Commerce' },
+  banking: { tr: 'Bankacılık', en: 'Banking' },
+  social: { tr: 'Sosyal Medya', en: 'Social Media' },
+  news: { tr: 'Haber', en: 'News' },
+  gov: { tr: 'Devlet', en: 'Government' },
+  telecom: { tr: 'Telekom', en: 'Telecom' },
+  food: { tr: 'Yemek & Teslimat', en: 'Food & Delivery' },
+  travel: { tr: 'Seyahat', en: 'Travel' },
+  tech: { tr: 'Teknoloji', en: 'Technology' },
+};
+
+// Blog
+export const BLOG_POSTS_PER_PAGE = 10;
+export const BLOG_CATEGORIES = ['trend', 'kesinti', 'analiz', 'genel'] as const;

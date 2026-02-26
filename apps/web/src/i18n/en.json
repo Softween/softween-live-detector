@@ -22,6 +22,7 @@
     "heartbeats": "Heartbeats",
     "settings": "Settings",
     "logout": "Logout",
+    "turkey": "T\u00fcrkiye",
     "menu": "Menu"
   },
   "landing": {
@@ -377,5 +378,40 @@
     "noTeam": "No team yet",
     "noTeamDesc": "Create a team to collaborate with others on monitoring.",
     "pendingInvite": "Pending"
+  },
+  "turkey": {
+    "title": "Turkey Site Status Dashboard",
+    "subtitle": "Real-time status of Turkey's most popular websites",
+    "allUp": "All Sites Operational",
+    "someDown": "Some Sites Down",
+    "majorOutage": "Major Outage Detected",
+    "lastUpdated": "Last updated",
+    "responseTime": "Response Time",
+    "uptime30d": "30-Day Uptime",
+    "sitesMonitored": "Sites Monitored",
+    "sitesUp": "Up",
+    "sitesDown": "Down",
+    "avgResponse": "Avg Response",
+    "recentIncidents": "Recent Incidents",
+    "noIncidents": "No incidents in the last 7 days",
+    "monitorYourSite": "Monitor your own site for free",
+    "duration": "Duration",
+    "ongoing": "Ongoing",
+    "poweredBy": "Monitored by LiveDetector"
+  },
+  "blog": {
+    "title": "Blog",
+    "allPosts": "All",
+    "trends": "Trends",
+    "outages": "Outages",
+    "analysis": "Analysis",
+    "general": "General",
+    "readMore": "Read More",
+    "publishedAt": "Published",
+    "relatedPosts": "Related Posts",
+    "sharePost": "Share this post",
+    "noPosts": "No blog posts yet",
+    "backToBlog": "Back to Blog",
+    "views": "views"
   }
 }

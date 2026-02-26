@@ -66,6 +66,12 @@ export default function Layout() {
               >
                 {t('nav.heartbeats')}
               </Link>
+              <Link
+                to="/turkiye"
+                className="px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors text-zinc-500 hover:text-zinc-300"
+              >
+                {t('nav.turkey', { defaultValue: 'T\u00fcrkiye' })}
+              </Link>
             </nav>
           </div>
 
@@ -136,6 +142,13 @@ export default function Layout() {
                 }`}
               >
                 {t('nav.heartbeats')}
+              </Link>
+              <Link
+                to="/turkiye"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 rounded-lg text-sm text-zinc-400"
+              >
+                {t('nav.turkey', { defaultValue: 'T\u00fcrkiye' })}
               </Link>
               <div className="border-t border-white/[0.04] pt-2 mt-2 flex items-center justify-between px-3">
                 <span className="text-xs text-zinc-500">{user?.name}</span>

@@ -1,4 +1,4 @@
-import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic, HeartbeatMonitor, ApiKey, Team, TeamMember, WebhookLog, SLAReport, IncidentUpdate } from 'shared';
+import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic, HeartbeatMonitor, ApiKey, Team, TeamMember, WebhookLog, SLAReport, IncidentUpdate, TurkeyDashboard, TurkeyIncidentPublic, BlogPost, BlogListResponse } from 'shared';
 import i18n from '../i18n';
 
 class ApiError extends Error {
@@ -164,6 +164,19 @@ export const api = {
   webhooks: {
     test: () => request<{ success: boolean; status_code?: number; error?: string }>('/api/webhooks/test', { method: 'POST' }),
     logs: () => request<WebhookLog[]>('/api/webhooks/logs'),
+  },
+  turkey: {
+    getDashboard: () => request<TurkeyDashboard>('/api/turkey'),
+    getIncidents: () => request<TurkeyIncidentPublic[]>('/api/turkey/incidents'),
+  },
+  blog: {
+    list: (page = 1, limit = 10, category?: string) => {
+      const params = new URLSearchParams({ page: String(page), limit: String(limit) });
+      if (category) params.set('category', category);
+      return request<BlogListResponse>('/api/blog?' + params);
+    },
+    get: (slug: string) => request<BlogPost>('/api/blog/' + slug),
+    recent: () => request<Omit<BlogPost, 'content' | 'content_en'>[]>('/api/blog/recent'),
   },
 };
 

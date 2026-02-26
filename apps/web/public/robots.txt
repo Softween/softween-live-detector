@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /turkiye
+Allow: /blog
+Allow: /blog/
 Allow: /status/
 Disallow: /dashboard
 Disallow: /monitors/

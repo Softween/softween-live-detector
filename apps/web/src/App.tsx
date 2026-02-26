@@ -23,6 +23,9 @@ const StatusPage = lazy(() => import('./pages/StatusPage'));
 const Heartbeats = lazy(() => import('./pages/Heartbeats'));
 const ApiKeys = lazy(() => import('./pages/ApiKeys'));
 const Teams = lazy(() => import('./pages/Teams'));
+const TurkeyDashboard = lazy(() => import('./pages/TurkeyDashboard'));
+const BlogList = lazy(() => import('./pages/BlogList'));
+const BlogPostPage = lazy(() => import('./pages/BlogPost'));
 
 function PageLoader() {
   return (
@@ -57,6 +60,10 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/status/:slug" element={<StatusPage />} />
+            <Route path="/turkiye" element={<TurkeyDashboard />} />
+            <Route path="/turkey" element={<Navigate to="/turkiye" replace />} />
+            <Route path="/blog" element={<BlogList />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/monitors/new" element={<AddMonitor />} />

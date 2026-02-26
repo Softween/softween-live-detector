@@ -198,3 +198,77 @@ export interface SLAReport {
   sla_target: number;
   sla_met: boolean;
 }
+
+// Turkey Public Dashboard
+export interface TurkeySite {
+  id: string;
+  name: string;
+  url: string;
+  category: string;
+  icon_url: string | null;
+  sort_order: number;
+  is_active: number;
+  current_status: 'up' | 'down' | 'unknown';
+  last_response_time_ms: number | null;
+  last_checked_at: string | null;
+  created_at: string;
+}
+
+export interface TurkeySitePublic {
+  id: string;
+  name: string;
+  url: string;
+  category: string;
+  current_status: 'up' | 'down' | 'unknown';
+  response_time_ms: number | null;
+  uptime_percentage: number;
+  daily_uptime: DailyUptime[];
+}
+
+export interface TurkeyIncidentPublic {
+  site_name: string;
+  site_url: string;
+  started_at: string;
+  resolved_at: string | null;
+  duration_minutes: number | null;
+}
+
+export interface TurkeyDashboard {
+  overall_status: 'all_up' | 'some_down' | 'major_outage';
+  total_sites: number;
+  sites_up: number;
+  sites_down: number;
+  avg_response_time_ms: number;
+  last_updated: string;
+  categories: {
+    name: string;
+    label_tr: string;
+    label_en: string;
+    sites: TurkeySitePublic[];
+  }[];
+  recent_incidents: TurkeyIncidentPublic[];
+}
+
+// Blog
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  title_en: string | null;
+  excerpt: string;
+  content: string;
+  content_en: string | null;
+  category: string;
+  tags: string[];
+  cover_image_url: string | null;
+  view_count: number;
+  published_at: string;
+  created_at: string;
+}
+
+export interface BlogListResponse {
+  posts: Omit<BlogPost, 'content' | 'content_en'>[];
+  total: number;
+  page: number;
+  limit: number;
+}
