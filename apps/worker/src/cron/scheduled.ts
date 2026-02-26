@@ -1,6 +1,6 @@
 import { CRON_BATCH_SIZE } from 'shared';
 import { pingMonitor, type PingResult } from '../services/ping.service';
-import { sendStatusNotification } from '../services/notification.service';
+import { sendStatusNotification, sendSlowResponseNotification } from '../services/notification.service';
 import { runCleanup } from '../services/cleanup.service';
 import type { Env } from '../env';
 
@@ -11,6 +11,15 @@ interface MonitorRow {
   expected_status: number;
   timeout_ms: number;
   current_status: string;
+  check_keyword: string | null;
+  maintenance_start: string | null;
+  maintenance_end: string | null;
+}
+
+function isInMaintenance(monitor: MonitorRow): boolean {
+  if (!monitor.maintenance_start || !monitor.maintenance_end) return false;
+  const now = new Date();
+  return now >= new Date(monitor.maintenance_start) && now <= new Date(monitor.maintenance_end);
 }
 
 export async function handleScheduled(
@@ -19,12 +28,15 @@ export async function handleScheduled(
 ): Promise<void> {
   // 1. Fetch all active monitors
   const monitors = await env.DB.prepare(
-    'SELECT id, url, method, expected_status, timeout_ms, current_status FROM monitors WHERE is_active = 1',
+    'SELECT id, url, method, expected_status, timeout_ms, current_status, check_keyword, maintenance_start, maintenance_end FROM monitors WHERE is_active = 1',
   ).all<MonitorRow>();
 
   if (!monitors.results || monitors.results.length === 0) return;
 
-  const allMonitors = monitors.results;
+  // Filter out monitors in maintenance window
+  const allMonitors = monitors.results.filter((m) => !isInMaintenance(m));
+
+  if (allMonitors.length === 0) return;
 
   // 2. Round-robin batch to stay within subrequest limits
   const offsetKey = 'cron:monitor_offset';
@@ -73,7 +85,14 @@ export async function handleScheduled(
     await handleStatusChange(change, env);
   }
 
-  // 7. Run daily cleanup
+  // 7. Check for slow responses
+  for (const result of results) {
+    if (result.status === 'up' && result.responseTime) {
+      await sendSlowResponseNotification(result.monitorId, result.responseTime, env);
+    }
+  }
+
+  // 8. Run daily cleanup
   await runCleanup(env);
 }
 

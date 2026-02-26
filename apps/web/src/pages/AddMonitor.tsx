@@ -20,6 +20,7 @@ export default function AddMonitor() {
   const [method, setMethod] = useState('GET');
   const [expectedStatus, setExpectedStatus] = useState(200);
   const [timeout, setTimeout] = useState(10000);
+  const [keyword, setKeyword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +36,7 @@ export default function AddMonitor() {
         method,
         expected_status: expectedStatus,
         timeout_ms: timeout,
+        check_keyword: keyword || undefined,
       });
       toast.success(t('monitor.createSuccess'));
 
@@ -125,6 +127,17 @@ export default function AddMonitor() {
             ))}
           </select>
           <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.timeoutHint')}</p>
+        </div>
+        <div>
+          <label className="label">{t('monitor.keyword')}</label>
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder={t('monitor.keywordPlaceholder')}
+            className="input"
+          />
+          <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.keywordHint')}</p>
         </div>
         <div className="flex gap-3 pt-3">
           <button type="submit" disabled={loading} className="btn-primary">

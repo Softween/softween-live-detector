@@ -31,24 +31,58 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json();
 }
 
+async function requestRaw(path: string, options?: RequestInit): Promise<Response> {
+  return fetch(`${API_BASE}${path}`, {
+    ...options,
+    credentials: 'include',
+  });
+}
+
 export const api = {
   auth: {
     register: (data: { email: string; password: string; name: string }) =>
-      request<{ id: string; email: string; name: string }>('/api/auth/register', {
+      request<{ id: string; email: string; name: string; email_verified: number }>('/api/auth/register', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     login: (data: { email: string; password: string }) =>
-      request<{ id: string; email: string; name: string }>('/api/auth/login', {
+      request<{ id: string; email: string; name: string; email_verified: number }>('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
     logout: () => request<{ success: boolean }>('/api/auth/logout', { method: 'POST' }),
-    me: () => request<{ id: string; email: string; name: string; created_at: string }>('/api/auth/me'),
+    me: () => request<{ id: string; email: string; name: string; email_verified: number; created_at: string }>('/api/auth/me'),
+    forgotPassword: (email: string) =>
+      request<{ success: boolean }>('/api/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+    resetPassword: (token: string, password: string) =>
+      request<{ success: boolean }>('/api/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ token, password }),
+      }),
+    verifyEmail: (token: string) =>
+      request<{ success: boolean }>('/api/auth/verify-email', {
+        method: 'POST',
+        body: JSON.stringify({ token }),
+      }),
+    resendVerification: () =>
+      request<{ success: boolean }>('/api/auth/resend-verification', { method: 'POST' }),
+    changePassword: (currentPassword: string, newPassword: string) =>
+      request<{ success: boolean }>('/api/auth/password', {
+        method: 'PUT',
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      }),
+    deleteAccount: (password: string) =>
+      request<{ success: boolean }>('/api/auth/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ password }),
+      }),
     getNotifications: () =>
-      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean }>('/api/auth/notifications'),
-    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string; webhook_url?: string; webhook_enabled?: boolean }) =>
-      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean }>('/api/auth/notifications', {
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean }>('/api/auth/notifications'),
+    updateNotifications: (data: { email_enabled: boolean; cooldown_minutes: string; webhook_url?: string; webhook_enabled?: boolean; slow_threshold_ms?: number | null; slow_alert_enabled?: boolean }) =>
+      request<{ email_enabled: boolean; cooldown_minutes: number; webhook_url: string; webhook_enabled: boolean; slow_threshold_ms: number | null; slow_alert_enabled: boolean }>('/api/auth/notifications', {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
@@ -56,9 +90,9 @@ export const api = {
   monitors: {
     list: () => request<Monitor[]>('/api/monitors'),
     get: (id: string) => request<Monitor>(`/api/monitors/${id}`),
-    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number }) =>
+    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number; check_keyword?: string }) =>
       request<Monitor>('/api/monitors', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number }>) =>
+    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number; check_keyword: string | null; maintenance_start: string | null; maintenance_end: string | null }>) =>
       request<Monitor>(`/api/monitors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => request<{ success: boolean }>(`/api/monitors/${id}`, { method: 'DELETE' }),
     pause: (id: string) => request<Monitor>(`/api/monitors/${id}/pause`, { method: 'POST' }),
@@ -72,6 +106,8 @@ export const api = {
       request<MonitorStats>(`/api/checks/${monitorId}/stats?period=${period}`),
     dailyUptime: (monitorId: string, days = 90) =>
       request<DailyUptime[]>(`/api/checks/${monitorId}/daily-uptime?days=${days}`),
+    exportData: (monitorId: string, format: 'csv' | 'json' = 'csv') =>
+      requestRaw(`/api/checks/${monitorId}/export?format=${format}`),
   },
   visitor: {
     increment: () => request<{ count: number }>('/api/visitor', { method: 'POST' }),

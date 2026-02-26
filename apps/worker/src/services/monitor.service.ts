@@ -31,6 +31,7 @@ export async function createMonitor(
     method: string;
     expected_status: number;
     timeout_ms: number;
+    check_keyword?: string;
   },
 ): Promise<Monitor> {
   // Check monitor limit
@@ -45,12 +46,13 @@ export async function createMonitor(
   }
 
   const id = crypto.randomUUID();
+  const keyword = data.check_keyword || null;
 
   await env.DB.prepare(
-    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms, check_keyword)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
   )
-    .bind(id, userId, data.name, data.url, data.method, data.expected_status, data.timeout_ms)
+    .bind(id, userId, data.name, data.url, data.method, data.expected_status, data.timeout_ms, keyword)
     .run();
 
   return (await env.DB.prepare('SELECT * FROM monitors WHERE id = ?').bind(id).first<Monitor>())!;
@@ -66,6 +68,9 @@ export async function updateMonitor(
     method: string;
     expected_status: number;
     timeout_ms: number;
+    check_keyword: string | null;
+    maintenance_start: string | null;
+    maintenance_end: string | null;
   }>,
 ): Promise<Monitor | null> {
   const existing = await getMonitor(env, monitorId, userId);
@@ -93,6 +98,18 @@ export async function updateMonitor(
   if (data.timeout_ms !== undefined) {
     fields.push('timeout_ms = ?');
     values.push(data.timeout_ms);
+  }
+  if (data.check_keyword !== undefined) {
+    fields.push('check_keyword = ?');
+    values.push(data.check_keyword || null);
+  }
+  if (data.maintenance_start !== undefined) {
+    fields.push('maintenance_start = ?');
+    values.push(data.maintenance_start || null);
+  }
+  if (data.maintenance_end !== undefined) {
+    fields.push('maintenance_end = ?');
+    values.push(data.maintenance_end || null);
   }
 
   if (fields.length === 0) return existing;
@@ -139,4 +156,12 @@ export async function toggleMonitor(
     .run();
 
   return getMonitor(env, monitorId, userId);
+}
+
+export function isInMaintenanceWindow(monitor: Monitor): boolean {
+  if (!monitor.maintenance_start || !monitor.maintenance_end) return false;
+  const now = new Date();
+  const start = new Date(monitor.maintenance_start);
+  const end = new Date(monitor.maintenance_end);
+  return now >= start && now <= end;
 }

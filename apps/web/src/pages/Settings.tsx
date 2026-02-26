@@ -1,18 +1,37 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import type { Monitor, StatusPage } from 'shared';
 import { useAuth } from '../hooks/useAuth';
 import { api } from '../api/client';
+import Modal from '../components/ui/Modal';
 
 export default function Settings() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
+  const navigate = useNavigate();
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [cooldown, setCooldown] = useState('15');
   const [webhookUrl, setWebhookUrl] = useState('');
   const [webhookEnabled, setWebhookEnabled] = useState(false);
+  const [slowThreshold, setSlowThreshold] = useState('');
+  const [slowEnabled, setSlowEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+  const [pwLoading, setPwLoading] = useState(false);
+
+  // Account delete state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Email verification
+  const [resendLoading, setResendLoading] = useState(false);
 
   // Status page state
   const [monitors, setMonitors] = useState<Monitor[]>([]);
@@ -30,6 +49,8 @@ export default function Settings() {
       setCooldown(String(settings.cooldown_minutes));
       setWebhookUrl(settings.webhook_url || '');
       setWebhookEnabled(settings.webhook_enabled);
+      setSlowThreshold(settings.slow_threshold_ms ? String(settings.slow_threshold_ms) : '');
+      setSlowEnabled(settings.slow_alert_enabled);
     }).catch(() => {});
 
     api.monitors.list().then(setMonitors).catch(() => {});
@@ -54,12 +75,61 @@ export default function Settings() {
         cooldown_minutes: cooldown,
         webhook_url: webhookUrl || '',
         webhook_enabled: webhookEnabled,
+        slow_threshold_ms: slowEnabled && slowThreshold ? parseInt(slowThreshold, 10) : null,
+        slow_alert_enabled: slowEnabled,
       });
       toast.success(t('settings.saveSuccess'));
     } catch {
       toast.error(t('settings.saveError'));
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handlePasswordChange() {
+    if (newPassword !== newPasswordConfirm) {
+      toast.error(t('auth.passwordMismatch'));
+      return;
+    }
+    setPwLoading(true);
+    try {
+      await api.auth.changePassword(currentPassword, newPassword);
+      toast.success(t('settings.passwordChanged'));
+      setCurrentPassword('');
+      setNewPassword('');
+      setNewPasswordConfirm('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('settings.saveError'));
+    } finally {
+      setPwLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleteLoading(true);
+    try {
+      await api.auth.deleteAccount(deletePassword);
+      toast.success(t('settings.accountDeleted'));
+      await logout();
+      navigate('/');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('settings.saveError'));
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
+      setDeletePassword('');
+    }
+  }
+
+  async function handleResendVerification() {
+    setResendLoading(true);
+    try {
+      await api.auth.resendVerification();
+      toast.success(t('settings.verificationSent'));
+    } catch {
+      toast.error(t('settings.saveError'));
+    } finally {
+      setResendLoading(false);
     }
   }
 
@@ -97,6 +167,26 @@ export default function Settings() {
     <div className="max-w-lg">
       <h1 className="text-xl font-bold tracking-tight text-zinc-100 mb-8">{t('settings.title')}</h1>
 
+      {/* Email Verification Banner */}
+      {user && user.email_verified === 0 && (
+        <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/15 rounded-lg flex items-start gap-3">
+          <svg className="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+          <div className="flex-1">
+            <p className="text-sm text-amber-400 font-medium">{t('settings.emailNotVerified')}</p>
+            <p className="text-xs text-amber-400/60 mt-1">{t('settings.emailNotVerifiedDesc')}</p>
+            <button
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+              className="text-xs text-amber-400 hover:text-amber-300 font-medium mt-2 underline"
+            >
+              {resendLoading ? t('common.loading') : t('settings.resendVerification')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Account Info */}
       <div className="card p-5 mb-4">
         <h2 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-4">{t('settings.accountInfo')}</h2>
@@ -107,8 +197,40 @@ export default function Settings() {
           </div>
           <div className="flex justify-between">
             <span className="text-zinc-500">{t('auth.email')}</span>
-            <span className="text-zinc-200 font-medium">{user?.email}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-zinc-200 font-medium">{user?.email}</span>
+              {user?.email_verified === 1 && (
+                <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">{t('settings.verified')}</span>
+              )}
+            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Change Password */}
+      <div className="card p-5 mb-4">
+        <h2 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-5">{t('settings.changePassword')}</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="label">{t('settings.currentPassword')}</label>
+            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="input" />
+          </div>
+          <div>
+            <label className="label">{t('auth.newPassword')}</label>
+            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} minLength={8} className="input" />
+            <p className="text-xs text-zinc-600 mt-1">{t('auth.passwordHint')}</p>
+          </div>
+          <div>
+            <label className="label">{t('auth.passwordConfirm')}</label>
+            <input type="password" value={newPasswordConfirm} onChange={(e) => setNewPasswordConfirm(e.target.value)} minLength={8} className="input" />
+          </div>
+          <button
+            onClick={handlePasswordChange}
+            disabled={pwLoading || !currentPassword || !newPassword || !newPasswordConfirm}
+            className="btn-primary"
+          >
+            {pwLoading ? t('common.saving') : t('settings.updatePassword')}
+          </button>
         </div>
       </div>
 
@@ -139,6 +261,40 @@ export default function Settings() {
               <option value="60">{t('settings.cooldown60')}</option>
             </select>
             <p className="text-xs text-zinc-600 mt-1.5">{t('settings.cooldownDesc')}</p>
+          </div>
+
+          {/* Slow Response Alert */}
+          <div className="border-t border-white/[0.06] pt-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-sm font-medium text-zinc-200">{t('settings.slowResponseAlert')}</div>
+                <div className="text-xs text-zinc-500 mt-0.5">{t('settings.slowResponseAlertDesc')}</div>
+              </div>
+              <button
+                onClick={() => setSlowEnabled(!slowEnabled)}
+                className={`relative w-10 h-5 rounded-full transition-colors duration-150 ${slowEnabled ? 'bg-violet-600' : 'bg-zinc-700'}`}
+              >
+                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-150 ${slowEnabled ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
+            {slowEnabled && (
+              <div>
+                <label className="label">{t('settings.slowThreshold')}</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={slowThreshold}
+                    onChange={(e) => setSlowThreshold(e.target.value)}
+                    placeholder="3000"
+                    min={100}
+                    max={60000}
+                    className="input"
+                  />
+                  <span className="text-xs text-zinc-500 flex-shrink-0">ms</span>
+                </div>
+                <p className="text-xs text-zinc-600 mt-1.5">{t('settings.slowThresholdDesc')}</p>
+              </div>
+            )}
           </div>
 
           {/* Webhook */}
@@ -177,7 +333,7 @@ export default function Settings() {
       </div>
 
       {/* Status Page Settings */}
-      <div className="card p-5">
+      <div className="card p-5 mb-4">
         <h2 className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-5">{t('settings.statusPageTitle')}</h2>
 
         <div className="space-y-5">
@@ -276,6 +432,51 @@ export default function Settings() {
           )}
         </div>
       </div>
+
+      {/* Danger Zone */}
+      <div className="card p-5 border-red-500/20">
+        <h2 className="text-[11px] font-medium text-red-400 uppercase tracking-wider mb-4">{t('settings.dangerZone')}</h2>
+        <p className="text-xs text-zinc-500 mb-4">{t('settings.deleteAccountDesc')}</p>
+        <button
+          onClick={() => setShowDeleteModal(true)}
+          className="px-4 py-2 text-sm font-medium text-red-400 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors"
+        >
+          {t('settings.deleteAccount')}
+        </button>
+      </div>
+
+      {/* Delete Account Modal */}
+      <Modal open={showDeleteModal} onClose={() => { setShowDeleteModal(false); setDeletePassword(''); }}>
+        <div className="p-6 max-w-sm mx-auto">
+          <h3 className="text-lg font-bold text-zinc-100 mb-2">{t('settings.deleteAccount')}</h3>
+          <p className="text-sm text-zinc-400 mb-5">{t('settings.deleteAccountConfirm')}</p>
+          <div className="mb-4">
+            <label className="label">{t('auth.password')}</label>
+            <input
+              type="password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+              placeholder={t('settings.enterPasswordToConfirm')}
+              className="input"
+            />
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => { setShowDeleteModal(false); setDeletePassword(''); }}
+              className="btn-secondary flex-1"
+            >
+              {t('common.cancel')}
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              disabled={deleteLoading || !deletePassword}
+              className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50"
+            >
+              {deleteLoading ? t('common.deleting') : t('common.delete')}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -24,6 +24,9 @@ export default function EditMonitor() {
   const [method, setMethod] = useState('GET');
   const [expectedStatus, setExpectedStatus] = useState(200);
   const [timeout, setTimeout] = useState(10000);
+  const [keyword, setKeyword] = useState('');
+  const [maintenanceStart, setMaintenanceStart] = useState('');
+  const [maintenanceEnd, setMaintenanceEnd] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -36,6 +39,9 @@ export default function EditMonitor() {
       setMethod(data.method);
       setExpectedStatus(data.expected_status);
       setTimeout(data.timeout_ms);
+      setKeyword(data.check_keyword || '');
+      setMaintenanceStart(data.maintenance_start || '');
+      setMaintenanceEnd(data.maintenance_end || '');
     }).catch(() => {
       toast.error(t('monitor.notFound'));
       navigate('/dashboard');
@@ -49,7 +55,14 @@ export default function EditMonitor() {
     setLoading(true);
 
     try {
-      await api.monitors.update(id, { name, url, method, expected_status: expectedStatus, timeout_ms: timeout });
+      await api.monitors.update(id, {
+        name, url, method,
+        expected_status: expectedStatus,
+        timeout_ms: timeout,
+        check_keyword: keyword || null,
+        maintenance_start: maintenanceStart || null,
+        maintenance_end: maintenanceEnd || null,
+      });
       toast.success(t('monitor.updateSuccess'));
       navigate(`/monitors/${id}`);
     } catch (err: unknown) {
@@ -118,6 +131,52 @@ export default function EditMonitor() {
             ))}
           </select>
           <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.timeoutHint')}</p>
+        </div>
+        <div>
+          <label className="label">{t('monitor.keyword')}</label>
+          <input
+            type="text"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            placeholder={t('monitor.keywordPlaceholder')}
+            className="input"
+          />
+          <p className="text-xs text-zinc-600 mt-1.5">{t('monitor.keywordHint')}</p>
+        </div>
+
+        {/* Maintenance Window */}
+        <div className="border-t border-white/[0.06] pt-5">
+          <label className="label mb-3">{t('monitor.maintenanceWindow')}</label>
+          <p className="text-xs text-zinc-600 mb-3">{t('monitor.maintenanceDesc')}</p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="label text-[10px]">{t('monitor.maintenanceStart')}</label>
+              <input
+                type="datetime-local"
+                value={maintenanceStart}
+                onChange={(e) => setMaintenanceStart(e.target.value)}
+                className="input text-xs"
+              />
+            </div>
+            <div>
+              <label className="label text-[10px]">{t('monitor.maintenanceEnd')}</label>
+              <input
+                type="datetime-local"
+                value={maintenanceEnd}
+                onChange={(e) => setMaintenanceEnd(e.target.value)}
+                className="input text-xs"
+              />
+            </div>
+          </div>
+          {maintenanceStart && maintenanceEnd && (
+            <button
+              type="button"
+              onClick={() => { setMaintenanceStart(''); setMaintenanceEnd(''); }}
+              className="text-xs text-red-400 hover:text-red-300 mt-2"
+            >
+              {t('monitor.clearMaintenance')}
+            </button>
+          )}
         </div>
         <div className="flex gap-3 pt-3">
           <button type="submit" disabled={loading} className="btn-primary">

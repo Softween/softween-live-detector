@@ -16,6 +16,7 @@ interface MonitorRow {
   expected_status: number;
   timeout_ms: number;
   current_status: string;
+  check_keyword: string | null;
 }
 
 export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
@@ -37,7 +38,26 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
 
     clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
-    const isUp = response.status === (monitor.expected_status || 200);
+    const statusMatch = response.status === (monitor.expected_status || 200);
+
+    // Keyword check: if keyword is set and method is GET, read body and check
+    let keywordMatch = true;
+    if (monitor.check_keyword && monitor.method !== 'HEAD' && statusMatch) {
+      try {
+        const body = await response.text();
+        keywordMatch = body.includes(monitor.check_keyword);
+      } catch {
+        keywordMatch = false;
+      }
+    }
+
+    const isUp = statusMatch && keywordMatch;
+    let errorMsg: string | null = null;
+    if (!statusMatch) {
+      errorMsg = `Unexpected status: ${response.status}`;
+    } else if (!keywordMatch) {
+      errorMsg = `Keyword not found: "${monitor.check_keyword}"`;
+    }
 
     return {
       id,
@@ -45,7 +65,7 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
       status: isUp ? 'up' : 'down',
       statusCode: response.status,
       responseTime,
-      error: isUp ? null : `Unexpected status: ${response.status}`,
+      error: errorMsg,
       previousStatus: monitor.current_status,
       statusChanged:
         monitor.current_status !== 'unknown' &&

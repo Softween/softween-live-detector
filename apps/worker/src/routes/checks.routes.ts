@@ -80,4 +80,51 @@ checks.get('/:monitorId/daily-uptime', async (c) => {
   return c.json(data);
 });
 
+// Data export - CSV or JSON
+checks.get('/:monitorId/export', async (c) => {
+  const userId = c.get('userId');
+  const monitorId = c.req.param('monitorId');
+  const format = c.req.query('format') || 'csv';
+
+  // Verify ownership
+  const monitor = await c.env.DB.prepare(
+    'SELECT id, name FROM monitors WHERE id = ? AND user_id = ?',
+  ).bind(monitorId, userId).first<{ id: string; name: string }>();
+
+  if (!monitor) {
+    return c.json({ error: 'Monitor not found' }, 404);
+  }
+
+  const result = await c.env.DB.prepare(
+    'SELECT status, status_code, response_time_ms, error_message, checked_at FROM checks WHERE monitor_id = ? ORDER BY checked_at DESC LIMIT 10000',
+  ).bind(monitorId).all<{ status: string; status_code: number | null; response_time_ms: number | null; error_message: string | null; checked_at: string }>();
+
+  const rows = result.results;
+
+  if (format === 'json') {
+    const filename = `${monitor.name.replace(/[^a-zA-Z0-9]/g, '_')}_checks.json`;
+    return new Response(JSON.stringify(rows, null, 2), {
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
+  }
+
+  // CSV format
+  const csvHeader = 'status,status_code,response_time_ms,error_message,checked_at';
+  const csvRows = rows.map((r) =>
+    `${r.status},${r.status_code ?? ''},${r.response_time_ms ?? ''},"${(r.error_message || '').replace(/"/g, '""')}",${r.checked_at}`,
+  );
+  const csv = [csvHeader, ...csvRows].join('\n');
+  const filename = `${monitor.name.replace(/[^a-zA-Z0-9]/g, '_')}_checks.csv`;
+
+  return new Response(csv, {
+    headers: {
+      'Content-Type': 'text/csv',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    },
+  });
+});
+
 export { checks as checkRoutes };

@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  email_verified: number;
   created_at: string;
   updated_at: string;
 }
@@ -17,6 +18,9 @@ export interface Monitor {
   is_active: number;
   current_status: 'up' | 'down' | 'unknown';
   last_checked_at: string | null;
+  check_keyword: string | null;
+  maintenance_start: string | null;
+  maintenance_end: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -44,13 +48,15 @@ export interface NotificationSettings {
   user_id: string;
   email_enabled: number;
   cooldown_minutes: number;
+  slow_threshold_ms: number | null;
+  slow_alert_enabled: number;
 }
 
 export interface NotificationLog {
   id: string;
   user_id: string;
   monitor_id: string;
-  type: 'down' | 'up';
+  type: 'down' | 'up' | 'slow';
   sent_at: string;
 }
 

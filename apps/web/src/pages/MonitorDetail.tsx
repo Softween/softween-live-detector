@@ -111,6 +111,26 @@ export default function MonitorDetail() {
     }
   }
 
+  async function handleExport(format: 'csv' | 'json') {
+    if (!id) return;
+    try {
+      const response = await api.checks.exportData(id, format);
+      if (!response.ok) {
+        toast.error(t('common.error'));
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `checks.${format}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error(t('common.error'));
+    }
+  }
+
   async function handleToggle() {
     if (!id || !monitor) return;
     setToggling(true);
@@ -306,6 +326,20 @@ export default function MonitorDetail() {
             )}
           </>
         )}
+      </div>
+
+      {/* Export */}
+      <div className="card p-4 mt-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-1">{t('detail.exportData')}</div>
+            <p className="text-[11px] text-zinc-600">{t('detail.exportDesc')}</p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0 ml-3">
+            <button onClick={() => handleExport('csv')} className="btn-secondary text-xs">CSV</button>
+            <button onClick={() => handleExport('json')} className="btn-secondary text-xs">JSON</button>
+          </div>
+        </div>
       </div>
 
       {/* Badge embed */}

@@ -129,6 +129,7 @@ monitors.post('/:id/ping', async (c) => {
     expected_status: monitor.expected_status,
     timeout_ms: monitor.timeout_ms,
     current_status: monitor.current_status,
+    check_keyword: monitor.check_keyword,
   });
 
   // Save the check result
