@@ -13,6 +13,15 @@ blog.post('/generate-ai', async (c) => {
   return c.json({ generated: count });
 });
 
+// Preview AI output without saving (admin only)
+blog.post('/preview-ai', async (c) => {
+  const secret = c.req.query('secret');
+  if (secret !== c.env.JWT_SECRET) return c.json({ error: 'Unauthorized' }, 401);
+  const { previewAIBlogContent } = await import('../services/ai-blog.service');
+  const result = await previewAIBlogContent(c.env);
+  return c.json(result);
+});
+
 // Paginated blog list
 blog.get('/', async (c) => {
   const page = parseInt(c.req.query('page') || '1', 10);

@@ -21,10 +21,10 @@ export default function BlogList() {
   const [category, setCategory] = useState<string>('all');
 
   useSEO({
-    title: lang === 'tr' ? 'Blog - LiveDetector' : 'Blog - LiveDetector',
+    title: lang === 'tr' ? 'Blog — Türkiye İnternet Sağlığı ve Kesinti Haberleri' : 'Blog — Turkey Internet Health & Outage News',
     description: lang === 'tr'
-      ? 'Uptime izleme, site kesintileri ve web performans\u0131 hakk\u0131nda yaz\u0131lar.'
-      : 'Articles about uptime monitoring, site outages, and web performance.',
+      ? 'Türkiye\'nin popüler sitelerinin haftalık kesinti raporları, performans analizleri, Google Trends verileri ve AI destekli teknoloji makaleleri.'
+      : 'Weekly outage reports, performance analysis, Google Trends data and AI-powered tech articles about Turkey\'s popular websites.',
   });
 
   useEffect(() => {

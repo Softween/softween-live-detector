@@ -69,8 +69,8 @@ export async function getWeeklyOutageData(env: Env): Promise<{
 
 // Get performance rankings for Turkey sites
 export async function getPerformanceRankings(env: Env): Promise<{
-  fastest: { name: string; avgMs: number }[];
-  slowest: { name: string; avgMs: number }[];
+  fastest: { name: string; avg_ms: number }[];
+  slowest: { name: string; avg_ms: number }[];
 }> {
   const result = await env.DB.prepare(`
     SELECT ts.name, ROUND(AVG(tc.response_time_ms)) as avg_ms

@@ -125,7 +125,7 @@ function generateWeeklyOutagePost(
 }
 
 function generatePerformancePost(
-  perf: { fastest: { name: string; avgMs: number }[]; slowest: { name: string; avgMs: number }[] },
+  perf: { fastest: { name: string; avg_ms: number }[]; slowest: { name: string; avg_ms: number }[] },
   weekDate: string,
 ): { slug: string; title: string; excerpt: string; content: string; tags: string[] } {
   const title = `Türkiye Site Performans Sıralaması: ${weekDate}`;
@@ -137,20 +137,20 @@ function generatePerformancePost(
   content += `<h3>En Hızlı 5 Site</h3>\n`;
   content += `<ol>\n`;
   for (const site of perf.fastest) {
-    content += `<li><strong>${site.name}</strong> — ${site.avgMs}ms ortalama yanıt süresi</li>\n`;
+    content += `<li><strong>${site.name}</strong> — ${site.avg_ms}ms ortalama yanıt süresi</li>\n`;
   }
   content += `</ol>\n\n`;
 
   content += `<h3>En Yavaş 5 Site</h3>\n`;
   content += `<ol>\n`;
   for (const site of perf.slowest) {
-    content += `<li><strong>${site.name}</strong> — ${site.avgMs}ms ortalama yanıt süresi</li>\n`;
+    content += `<li><strong>${site.name}</strong> — ${site.avg_ms}ms ortalama yanıt süresi</li>\n`;
   }
   content += `</ol>\n\n`;
 
   content += `<h3>Analiz</h3>\n`;
-  content += `<p>Bu hafta en hızlı site <strong>${perf.fastest[0]?.name || '-'}</strong> (${perf.fastest[0]?.avgMs || 0}ms) olurken, `;
-  content += `en yavaş site <strong>${perf.slowest[0]?.name || '-'}</strong> (${perf.slowest[0]?.avgMs || 0}ms) oldu.</p>\n`;
+  content += `<p>Bu hafta en hızlı site <strong>${perf.fastest[0]?.name || '-'}</strong> (${perf.fastest[0]?.avg_ms || 0}ms) olurken, `;
+  content += `en yavaş site <strong>${perf.slowest[0]?.name || '-'}</strong> (${perf.slowest[0]?.avg_ms || 0}ms) oldu.</p>\n`;
   content += `\n<hr>\n<p><em>Veriler <a href="https://livedetector.softween.com/turkiye">LiveDetector</a> tarafından toplanmıştır.</em></p>`;
 
   return {

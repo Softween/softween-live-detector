@@ -46,6 +46,12 @@ export default function BlogPost() {
   useSEO({
     title: title || 'Blog',
     description: post?.excerpt || '',
+    ogType: 'article',
+    article: post ? {
+      publishedTime: post.published_at,
+      tags: post.tags,
+      section: post.category,
+    } : undefined,
   });
 
   function handleShare(platform: 'twitter' | 'whatsapp' | 'copy') {
