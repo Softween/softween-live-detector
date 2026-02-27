@@ -19,6 +19,9 @@
       "id": "f3f3b9d190b34444bb4633bf03771f1d"
     }
   ],
+  "ai": {
+    "binding": "AI"
+  },
   "vars": {
     "ENVIRONMENT": "production",
     "FRONTEND_URL": "https://livedetector.softween.com"

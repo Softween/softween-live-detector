@@ -7,6 +7,7 @@ import { checkSSLExpiry } from '../services/ssl.service';
 import { pingTurkeySite } from '../services/turkey-ping.service';
 import { seedTurkeySites } from '../services/turkey-seed.service';
 import { generateWeeklyBlogContent } from '../services/blog.service';
+import { generateAIBlogContent } from '../services/ai-blog.service';
 import type { Env } from '../env';
 
 interface MonitorRow {
@@ -118,13 +119,20 @@ export async function handleScheduled(
   // 11. Turkey site monitoring
   await handleTurkeyChecks(env);
 
-  // 12. Weekly blog generation (runs on Saturdays around 03:00 UTC)
+  // 12. Weekly template blog generation (runs on Saturdays around 03:00 UTC)
   const now = new Date();
   const lastBlogGen = await env.KV.get('cron:last_blog_gen');
   const weekKey = `${now.getFullYear()}-W${Math.ceil((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / 604800000)}`;
   if (lastBlogGen !== weekKey && now.getUTCDay() === 6 && now.getUTCHours() >= 3) {
     await generateWeeklyBlogContent(env);
     await env.KV.put('cron:last_blog_gen', weekKey);
+  }
+
+  // 13. AI-powered blog generation (runs on Sundays around 04:00 UTC)
+  const lastAiBlogGen = await env.KV.get('cron:last_ai_blog_gen');
+  if (lastAiBlogGen !== weekKey && now.getUTCDay() === 0 && now.getUTCHours() >= 4) {
+    await generateAIBlogContent(env);
+    await env.KV.put('cron:last_ai_blog_gen', weekKey);
   }
 }
 

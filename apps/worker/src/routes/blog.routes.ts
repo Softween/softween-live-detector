@@ -1,8 +1,17 @@
 import { Hono } from 'hono';
 import { getPublishedPosts, getPostBySlug, getRecentPosts } from '../services/blog.service';
+import { generateAIBlogContent } from '../services/ai-blog.service';
 import type { Env } from '../env';
 
 const blog = new Hono<{ Bindings: Env }>();
+
+// Manual AI blog generation trigger (admin only via secret query param)
+blog.post('/generate-ai', async (c) => {
+  const secret = c.req.query('secret');
+  if (secret !== c.env.JWT_SECRET) return c.json({ error: 'Unauthorized' }, 401);
+  const count = await generateAIBlogContent(c.env);
+  return c.json({ generated: count });
+});
 
 // Paginated blog list
 blog.get('/', async (c) => {

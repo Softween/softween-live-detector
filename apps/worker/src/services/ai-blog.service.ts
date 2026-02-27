@@ -1,0 +1,214 @@
+import type { Env } from '../env';
+import { fetchTurkeyTrends, getWeeklyOutageData, getPerformanceRankings, cacheTrends } from './trends.service';
+
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+    .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .substring(0, 80);
+}
+
+interface AiResponse {
+  response?: string;
+}
+
+async function askAI(env: Env, prompt: string): Promise<string> {
+  try {
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct' as any, {
+      messages: [
+        {
+          role: 'system',
+          content: 'Sen Türkiye\'nin internet altyapısı ve teknoloji dünyası hakkında uzman bir blog yazarısın. LiveDetector platformu için SEO uyumlu, bilgilendirici ve profesyonel blog yazıları yazıyorsun. HTML formatında yaz. Başlık tagları kullanma (h1/h2 zaten dışarıda ekleniyor), doğrudan içerik paragraflarıyla başla. <p>, <strong>, <ul>, <li>, <blockquote> tagları kullan.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 2048,
+    }) as AiResponse;
+    return result?.response || '';
+  } catch (e) {
+    console.error('AI generation failed:', e);
+    return '';
+  }
+}
+
+async function askAIEnglish(env: Env, prompt: string): Promise<string> {
+  try {
+    const result = await env.AI.run('@cf/meta/llama-3.1-8b-instruct' as any, {
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert blog writer about Turkey\'s internet infrastructure and technology. You write SEO-friendly, informative, and professional blog articles for the LiveDetector platform. Write in HTML format. Do not use heading tags (h1/h2 are added externally), start directly with content paragraphs. Use <p>, <strong>, <ul>, <li>, <blockquote> tags.',
+        },
+        { role: 'user', content: prompt },
+      ],
+      max_tokens: 2048,
+    }) as AiResponse;
+    return result?.response || '';
+  } catch (e) {
+    console.error('AI EN generation failed:', e);
+    return '';
+  }
+}
+
+// Generate AI-powered weekly outage analysis
+async function generateAIOutagePost(
+  env: Env,
+  outageData: { totalIncidents: number; sites: { name: string; url: string; incidents: number; totalDowntimeMin: number }[] },
+  weekDate: string,
+): Promise<{ slug: string; title: string; title_en: string; excerpt: string; content: string; content_en: string; tags: string[] } | null> {
+  const hasOutages = outageData.totalIncidents > 0;
+
+  // Build data context for AI
+  let dataContext: string;
+  if (hasOutages) {
+    const siteList = outageData.sites.map(s => `- ${s.name} (${s.url}): ${s.incidents} kesinti, toplam ${s.totalDowntimeMin} dakika`).join('\n');
+    dataContext = `Bu hafta (${weekDate}) Türkiye'nin en popüler sitelerinde toplam ${outageData.totalIncidents} kesinti tespit edildi:\n${siteList}`;
+  } else {
+    dataContext = `Bu hafta (${weekDate}) Türkiye'nin en popüler 33 sitesinde hiç kesinti yaşanmadı. Tüm siteler stabil çalıştı.`;
+  }
+
+  const trPrompt = `Aşağıdaki veriler ışığında haftalık kesinti analiz raporu yaz. Verileri yorumla, nedenleri tahmin et, kullanıcılara tavsiye ver. 400-600 kelime olsun.\n\nVeri:\n${dataContext}\n\nLiveDetector 33 Türk sitesini 7/24 izliyor. Rapor sonunda "livedetector.softween.com/turkiye" linkini ver.`;
+
+  const contentTr = await askAI(env, trPrompt);
+  if (!contentTr) return null;
+
+  const enPrompt = `Write a weekly outage analysis report based on this data. Interpret the data, speculate on causes, give advice to users. 400-600 words.\n\nData:\n${dataContext}\n\nLiveDetector monitors 33 Turkish sites 24/7. Include a link to "livedetector.softween.com/turkiye" at the end.`;
+
+  const contentEn = await askAIEnglish(env, enPrompt);
+
+  const title = hasOutages
+    ? `Haftalık Kesinti Analizi: ${weekDate} - ${outageData.totalIncidents} Kesinti`
+    : `Haftalık Kesinti Analizi: ${weekDate} - Sorunsuz Hafta`;
+  const titleEn = hasOutages
+    ? `Weekly Outage Analysis: ${weekDate} - ${outageData.totalIncidents} Outages Detected`
+    : `Weekly Outage Analysis: ${weekDate} - All Clear`;
+
+  return {
+    slug: `ai-kesinti-analizi-${slugify(weekDate)}`,
+    title,
+    title_en: titleEn,
+    excerpt: hasOutages
+      ? `AI destekli analiz: Bu hafta ${outageData.totalIncidents} kesinti tespit edildi. Detaylı yorumlar ve tavsiyeler...`
+      : `AI destekli analiz: Bu hafta tüm siteler sorunsuz çalıştı. Haftalık değerlendirme...`,
+    content: `<h2>AI Haftalık Kesinti Analizi - ${weekDate}</h2>\n${contentTr}\n<hr>\n<p><em>Bu makale LiveDetector AI tarafından otomatik üretilmiştir. Veriler <a href="https://livedetector.softween.com/turkiye">Türkiye Paneli</a>'nden alınmıştır.</em></p>`,
+    content_en: contentEn ? `<h2>AI Weekly Outage Analysis - ${weekDate}</h2>\n${contentEn}\n<hr>\n<p><em>This article was auto-generated by LiveDetector AI. Data sourced from <a href="https://livedetector.softween.com/turkiye">Turkey Dashboard</a>.</em></p>` : null,
+    tags: ['ai-analiz', 'kesinti', 'haftalik-rapor'],
+  };
+}
+
+// Generate AI-powered trend article
+async function generateAITrendPost(
+  env: Env,
+  trends: { title: string; traffic: string }[],
+  weekDate: string,
+): Promise<{ slug: string; title: string; title_en: string; excerpt: string; content: string; content_en: string; tags: string[] } | null> {
+  // Filter tech/internet related trends
+  const techKeywords = ['site', 'uygulama', 'app', 'internet', 'çöktü', 'erişim', 'arıza', 'güncelleme', 'siber', 'hack', 'yapay zeka', 'ai', 'sosyal medya', 'whatsapp', 'instagram', 'twitter', 'youtube', 'tiktok', 'google', 'apple', 'samsung', 'iphone', 'android', 'netflix', 'spotify'];
+  const techTrends = trends.filter(t =>
+    techKeywords.some(kw => t.title.toLowerCase().includes(kw)),
+  );
+  const trend = techTrends[0] || trends[0];
+  if (!trend) return null;
+
+  const trPrompt = `"${trend.title}" konusu bu hafta Türkiye'de Google Trends'te çok arandı${trend.traffic ? ` (yaklaşık ${trend.traffic} arama)` : ''}. Bu konu hakkında detaylı bir analiz yazısı yaz. Konunun Türkiye'deki internet kullanımına, dijital altyapıya ve kullanıcılara etkisini analiz et. SEO uyumlu, 500-700 kelime. Tarih: ${weekDate}.`;
+
+  const contentTr = await askAI(env, trPrompt);
+  if (!contentTr) return null;
+
+  const enPrompt = `"${trend.title}" was a top trending topic in Turkey on Google Trends this week${trend.traffic ? ` (approximately ${trend.traffic} searches)` : ''}. Write a detailed analysis about this topic. Analyze its impact on internet usage, digital infrastructure and users in Turkey. SEO-friendly, 500-700 words. Date: ${weekDate}.`;
+
+  const contentEn = await askAIEnglish(env, enPrompt);
+
+  return {
+    slug: `ai-trend-${slugify(trend.title)}-${slugify(weekDate)}`,
+    title: `Trend Analizi: "${trend.title}" - ${weekDate}`,
+    title_en: `Trend Analysis: "${trend.title}" - ${weekDate}`,
+    excerpt: `"${trend.title}" bu hafta Türkiye'de en çok aranan konulardan oldu. AI destekli detaylı analiz...`,
+    content: `<h2>AI Trend Analizi: ${trend.title}</h2>\n${contentTr}\n<hr>\n<p><em>Bu makale LiveDetector AI tarafından Google Trends Türkiye verileri kullanılarak üretilmiştir.</em></p>`,
+    content_en: contentEn ? `<h2>AI Trend Analysis: ${trend.title}</h2>\n${contentEn}\n<hr>\n<p><em>This article was auto-generated by LiveDetector AI using Google Trends Turkey data.</em></p>` : null,
+    tags: ['ai-analiz', 'trend', 'google-trends', slugify(trend.title)],
+  };
+}
+
+// Generate AI-powered performance deep-dive
+async function generateAIPerformancePost(
+  env: Env,
+  perf: { fastest: { name: string; avgMs: number }[]; slowest: { name: string; avgMs: number }[] },
+  weekDate: string,
+): Promise<{ slug: string; title: string; title_en: string; excerpt: string; content: string; content_en: string; tags: string[] } | null> {
+  if (perf.fastest.length === 0) return null;
+
+  const fastList = perf.fastest.map(s => `- ${s.name}: ${s.avgMs}ms`).join('\n');
+  const slowList = perf.slowest.map(s => `- ${s.name}: ${s.avgMs}ms`).join('\n');
+
+  const trPrompt = `Türkiye'nin popüler sitelerinin haftalık performans analizini yaz (${weekDate}).\n\nEn hızlı siteler:\n${fastList}\n\nEn yavaş siteler:\n${slowList}\n\nNeden bazı siteler daha hızlı? Performansı etkileyen faktörler neler? CDN, sunucu lokasyonu, optimizasyon gibi teknik detaylara gir. Kullanıcılara yavaş sitelere ne yapabileceklerini öner. 400-600 kelime.`;
+
+  const contentTr = await askAI(env, trPrompt);
+  if (!contentTr) return null;
+
+  const enPrompt = `Write a weekly performance analysis of Turkey's popular sites (${weekDate}).\n\nFastest sites:\n${fastList}\n\nSlowest sites:\n${slowList}\n\nWhy are some sites faster? What factors affect performance? Cover technical details like CDN, server location, optimization. Suggest what users can do about slow sites. 400-600 words.`;
+
+  const contentEn = await askAIEnglish(env, enPrompt);
+
+  return {
+    slug: `ai-performans-analizi-${slugify(weekDate)}`,
+    title: `AI Performans Analizi: ${weekDate} - Türkiye'nin En Hızlı ve Yavaş Siteleri`,
+    title_en: `AI Performance Analysis: ${weekDate} - Turkey's Fastest and Slowest Sites`,
+    excerpt: `Bu haftanın performans lideri ${perf.fastest[0]?.name || '-'}. AI destekli detaylı performans analizi ve teknik değerlendirme...`,
+    content: `<h2>AI Performans Analizi - ${weekDate}</h2>\n${contentTr}\n<hr>\n<p><em>Veriler <a href="https://livedetector.softween.com/turkiye">LiveDetector Türkiye Paneli</a>'nden alınmıştır. Analiz AI tarafından yapılmıştır.</em></p>`,
+    content_en: contentEn ? `<h2>AI Performance Analysis - ${weekDate}</h2>\n${contentEn}\n<hr>\n<p><em>Data sourced from <a href="https://livedetector.softween.com/turkiye">LiveDetector Turkey Dashboard</a>. Analysis powered by AI.</em></p>` : null,
+    tags: ['ai-analiz', 'performans', 'hız', 'türkiye'],
+  };
+}
+
+// Main AI blog generation pipeline - runs Sunday 04:00 UTC
+export async function generateAIBlogContent(env: Env): Promise<number> {
+  const now = new Date();
+  const weekDate = now.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Deduplication check
+  const existing = await env.DB.prepare(
+    "SELECT id FROM blog_posts WHERE slug LIKE 'ai-kesinti-analizi-%' AND created_at >= datetime('now', '-6 days')",
+  ).first();
+  if (existing) return 0;
+
+  const posts: { slug: string; title: string; title_en: string | null; excerpt: string; content: string; content_en: string | null; tags: string[]; category: string }[] = [];
+
+  // 1. AI outage analysis
+  const outageData = await getWeeklyOutageData(env);
+  const outagePost = await generateAIOutagePost(env, outageData, weekDate);
+  if (outagePost) posts.push({ ...outagePost, category: 'kesinti' });
+
+  // 2. AI trend article
+  const trends = await fetchTurkeyTrends(env);
+  if (trends.length > 0) {
+    await cacheTrends(env, trends);
+    const trendPost = await generateAITrendPost(env, trends, weekDate);
+    if (trendPost) posts.push({ ...trendPost, category: 'trend' });
+  }
+
+  // 3. AI performance deep-dive
+  const perfData = await getPerformanceRankings(env);
+  const perfPost = await generateAIPerformancePost(env, perfData, weekDate);
+  if (perfPost) posts.push({ ...perfPost, category: 'analiz' });
+
+  // Insert all posts
+  if (posts.length > 0) {
+    const stmt = env.DB.prepare(
+      `INSERT INTO blog_posts (id, slug, title, title_en, excerpt, content, content_en, category, tags, status, published_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'published', datetime('now'))`,
+    );
+    const batch = posts.map(p =>
+      stmt.bind(
+        crypto.randomUUID(), p.slug, p.title, p.title_en, p.excerpt,
+        p.content, p.content_en, p.category, JSON.stringify(p.tags),
+      ),
+    );
+    await env.DB.batch(batch);
+  }
+
+  return posts.length;
+}
