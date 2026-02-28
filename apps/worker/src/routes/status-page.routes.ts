@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { updateStatusPageSchema } from 'shared';
-import type { StatusPage } from 'shared';
+import type { StatusPage, IncidentUpdate } from 'shared';
 import { authMiddleware } from '../middleware/auth';
 import type { Env } from '../env';
 
@@ -17,20 +17,28 @@ statusPage.get('/s/:slug', async (c) => {
 
   const page = await c.env.DB.prepare(
     'SELECT * FROM status_pages WHERE slug = ? AND is_public = 1',
-  ).bind(slug).first<StatusPage>();
+  ).bind(slug).first<StatusPage & { logo_url: string | null; show_subscribe: number }>();
 
   if (!page) {
     return c.json({ error: 'Status page not found' }, 404);
   }
 
-  // Get monitors linked to this status page
+  // Get monitors linked to this status page with group info
   const monitorsResult = await c.env.DB.prepare(
-    `SELECT m.id, m.name, m.current_status
+    `SELECT m.id, m.name, m.current_status, m.group_id,
+            COALESCE(g.name, 'Ungrouped') as group_name,
+            COALESCE(g.color, '#71717a') as group_color,
+            COALESCE(g.sort_order, 999) as group_sort_order,
+            spm.sort_order
      FROM status_page_monitors spm
      JOIN monitors m ON spm.monitor_id = m.id
+     LEFT JOIN monitor_groups g ON m.group_id = g.id
      WHERE spm.status_page_id = ?
-     ORDER BY spm.sort_order ASC`,
-  ).bind(page.id).all<{ id: string; name: string; current_status: string }>();
+     ORDER BY group_sort_order ASC, spm.sort_order ASC`,
+  ).bind(page.id).all<{
+    id: string; name: string; current_status: string; group_id: string | null;
+    group_name: string; group_color: string; group_sort_order: number; sort_order: number;
+  }>();
 
   const monitors = monitorsResult.results;
 
@@ -54,24 +62,89 @@ statusPage.get('/s/:slug', async (c) => {
         uptime_pct: d.total > 0 ? Math.round((d.up_count / d.total) * 10000) / 100 : 100,
       }));
 
-      // Overall uptime percentage
       const totalChecks = daily_uptime.reduce((s, d) => s + d.total, 0);
       const totalUp = daily_uptime.reduce((s, d) => s + d.up_count, 0);
       const uptime_percentage = totalChecks > 0 ? Math.round((totalUp / totalChecks) * 10000) / 100 : 100;
 
       return {
-        name: m.name,
-        current_status: m.current_status as 'up' | 'down' | 'unknown',
+        ...m,
         uptime_percentage,
         daily_uptime,
       };
     }),
   );
 
+  // Group monitors
+  const groupMap = new Map<string | null, { id: string | null; name: string; color: string; monitors: typeof monitorsWithUptime }>();
+  for (const m of monitorsWithUptime) {
+    const key = m.group_id;
+    if (!groupMap.has(key)) {
+      groupMap.set(key, { id: key, name: m.group_name, color: m.group_color, monitors: [] });
+    }
+    groupMap.get(key)!.monitors.push(m);
+  }
+  const groups = Array.from(groupMap.values()).map((g) => ({
+    id: g.id,
+    name: g.name,
+    color: g.color,
+    monitors: g.monitors.map((m) => ({
+      name: m.name,
+      current_status: m.current_status as 'up' | 'down' | 'unknown',
+      uptime_percentage: m.uptime_percentage,
+      daily_uptime: m.daily_uptime,
+    })),
+  }));
+
+  // Get recent incidents (30 days)
+  const monitorIds = monitors.map((m) => m.id);
+  let incidents: { monitor_name: string; started_at: string; resolved_at: string | null; cause: string | null; updates: IncidentUpdate[] }[] = [];
+
+  if (monitorIds.length > 0) {
+    const placeholders = monitorIds.map(() => '?').join(',');
+    const incidentResult = await c.env.DB.prepare(
+      `SELECT i.id, i.started_at, i.resolved_at, i.cause, m.name as monitor_name
+       FROM incidents i
+       JOIN monitors m ON i.monitor_id = m.id
+       WHERE i.monitor_id IN (${placeholders}) AND i.started_at >= datetime('now', '-30 days')
+       ORDER BY i.started_at DESC
+       LIMIT 20`,
+    ).bind(...monitorIds).all<{ id: string; started_at: string; resolved_at: string | null; cause: string | null; monitor_name: string }>();
+
+    incidents = await Promise.all(
+      incidentResult.results.map(async (inc) => {
+        const updatesResult = await c.env.DB.prepare(
+          'SELECT * FROM incident_updates WHERE incident_id = ? ORDER BY created_at ASC',
+        ).bind(inc.id).all<IncidentUpdate>();
+
+        return {
+          monitor_name: inc.monitor_name,
+          started_at: inc.started_at,
+          resolved_at: inc.resolved_at,
+          cause: inc.cause,
+          updates: updatesResult.results,
+        };
+      }),
+    );
+  }
+
+  // Calculate overall status
+  const allStatuses = monitors.map((m) => m.current_status);
+  const downCount = allStatuses.filter((s) => s === 'down').length;
+  let overall_status: 'operational' | 'degraded' | 'major_outage' | 'maintenance' = 'operational';
+  if (downCount > 0 && downCount >= allStatuses.length / 2) {
+    overall_status = 'major_outage';
+  } else if (downCount > 0) {
+    overall_status = 'degraded';
+  }
+
   return c.json({
     title: page.title,
     description: page.description,
-    monitors: monitorsWithUptime,
+    logo_url: page.logo_url || null,
+    show_subscribe: page.show_subscribe ?? 1,
+    overall_status,
+    groups,
+    incidents,
   });
 });
 

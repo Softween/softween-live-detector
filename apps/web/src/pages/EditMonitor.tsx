@@ -5,6 +5,8 @@ import toast from 'react-hot-toast';
 import type { Monitor } from 'shared';
 import { api } from '../api/client';
 import Spinner from '../components/ui/Spinner';
+import GroupSelector from '../components/GroupSelector';
+import TagSelector from '../components/TagSelector';
 
 const TIMEOUT_OPTIONS = [
   { value: 3000, key: 'timeout3' },
@@ -39,6 +41,8 @@ export default function EditMonitor() {
   const [checkRegions, setCheckRegions] = useState('auto');
   const [maintenanceStart, setMaintenanceStart] = useState('');
   const [maintenanceEnd, setMaintenanceEnd] = useState('');
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -59,6 +63,8 @@ export default function EditMonitor() {
       setCheckInterval((data as any).check_interval_seconds || 300);
       setCustomHeaders((data as any).custom_headers || '');
       setCheckRegions((data as any).check_regions || 'auto');
+      setGroupId(data.group_id || null);
+      setTagIds(data.tags?.map((t) => t.id) || []);
     }).catch(() => {
       toast.error(t('monitor.notFound'));
       navigate('/dashboard');
@@ -84,7 +90,12 @@ export default function EditMonitor() {
         check_interval_seconds: checkInterval,
         custom_headers: customHeaders || undefined,
         check_regions: checkRegions,
+        group_id: groupId,
       } as any);
+      // Update tags separately
+      if (id) {
+        await api.tags.setMonitorTags(id, tagIds).catch(() => {});
+      }
       toast.success(t('monitor.updateSuccess'));
       navigate(`/monitors/${id}`);
     } catch (err: unknown) {
@@ -243,6 +254,12 @@ export default function EditMonitor() {
             <option value="eu">{t('monitor.regionEu')}</option>
             <option value="asia">{t('monitor.regionAsia')}</option>
           </select>
+        </div>
+
+        {/* Group & Tags */}
+        <div className="border-t border-white/[0.06] pt-5 space-y-5">
+          <GroupSelector value={groupId} onChange={setGroupId} />
+          <TagSelector value={tagIds} onChange={setTagIds} />
         </div>
 
         {/* Maintenance Window */}

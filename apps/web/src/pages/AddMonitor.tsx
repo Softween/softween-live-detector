@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import { api } from '../api/client';
+import GroupSelector from '../components/GroupSelector';
+import TagSelector from '../components/TagSelector';
 
 const TIMEOUT_OPTIONS = [
   { value: 3000, key: 'timeout3' },
@@ -33,6 +35,8 @@ export default function AddMonitor() {
   const [keyword, setKeyword] = useState('');
   const [customHeaders, setCustomHeaders] = useState('');
   const [checkRegions, setCheckRegions] = useState('auto');
+  const [groupId, setGroupId] = useState<string | null>(null);
+  const [tagIds, setTagIds] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -54,6 +58,8 @@ export default function AddMonitor() {
         check_interval_seconds: checkInterval,
         custom_headers: customHeaders || undefined,
         check_regions: checkRegions,
+        group_id: groupId,
+        tag_ids: tagIds.length > 0 ? tagIds : undefined,
       } as any);
       toast.success(t('monitor.createSuccess'));
 
@@ -227,6 +233,12 @@ export default function AddMonitor() {
             <option value="eu">{t('monitor.regionEu')}</option>
             <option value="asia">{t('monitor.regionAsia')}</option>
           </select>
+        </div>
+
+        {/* Group & Tags */}
+        <div className="border-t border-white/[0.06] pt-5 space-y-5">
+          <GroupSelector value={groupId} onChange={setGroupId} />
+          <TagSelector value={tagIds} onChange={setTagIds} />
         </div>
 
         <div className="flex gap-3 pt-3">

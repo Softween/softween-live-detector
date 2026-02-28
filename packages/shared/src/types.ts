@@ -30,8 +30,41 @@ export interface Monitor {
   port: number | null;
   domain_expiry_at: string | null;
   check_regions: string;
+  group_id: string | null;
+  group_name?: string;
+  group_color?: string;
+  tags?: Tag[];
   created_at: string;
   updated_at: string;
+}
+
+export interface MonitorGroup {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  color: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Tag {
+  id: string;
+  user_id: string;
+  name: string;
+  color: string;
+  created_at: string;
+}
+
+export interface BulkImportResult {
+  created: number;
+  failed: { url: string; error: string }[];
+}
+
+export interface SitemapParseResult {
+  urls: string[];
+  total: number;
 }
 
 export interface Check {
@@ -128,14 +161,31 @@ export interface DailyUptime {
   uptime_pct: number;
 }
 
+export interface StatusPageMonitorPublic {
+  name: string;
+  current_status: 'up' | 'down' | 'unknown';
+  uptime_percentage: number;
+  daily_uptime: DailyUptime[];
+}
+
 export interface StatusPagePublic {
   title: string;
   description: string | null;
-  monitors: {
+  logo_url: string | null;
+  show_subscribe: number;
+  overall_status: 'operational' | 'degraded' | 'major_outage' | 'maintenance';
+  groups: {
+    id: string | null;
     name: string;
-    current_status: 'up' | 'down' | 'unknown';
-    uptime_percentage: number;
-    daily_uptime: DailyUptime[];
+    color: string;
+    monitors: StatusPageMonitorPublic[];
+  }[];
+  incidents: {
+    monitor_name: string;
+    started_at: string;
+    resolved_at: string | null;
+    cause: string | null;
+    updates: IncidentUpdate[];
   }[];
 }
 

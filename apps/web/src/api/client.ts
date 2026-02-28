@@ -1,4 +1,4 @@
-import type { Monitor, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic, HeartbeatMonitor, ApiKey, Team, TeamMember, WebhookLog, SLAReport, IncidentUpdate, TurkeyDashboard, TurkeyIncidentPublic, BlogPost, BlogListResponse } from 'shared';
+import type { Monitor, MonitorGroup, Tag, MonitorStats, Check, PaginatedResponse, DailyUptime, StatusPage, StatusPagePublic, HeartbeatMonitor, ApiKey, Team, TeamMember, WebhookLog, SLAReport, IncidentUpdate, TurkeyDashboard, TurkeyIncidentPublic, BlogPost, BlogListResponse, BulkImportResult, SitemapParseResult } from 'shared';
 import i18n from '../i18n';
 
 class ApiError extends Error {
@@ -90,9 +90,9 @@ export const api = {
   monitors: {
     list: () => request<Monitor[]>('/api/monitors'),
     get: (id: string) => request<Monitor>(`/api/monitors/${id}`),
-    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number; check_keyword?: string; check_interval_seconds?: number; custom_headers?: string; monitor_type?: string; port?: number; check_regions?: string }) =>
+    create: (data: { name: string; url: string; method?: string; expected_status?: number; timeout_ms?: number; check_keyword?: string; check_interval_seconds?: number; custom_headers?: string; monitor_type?: string; port?: number; check_regions?: string; group_id?: string | null; tag_ids?: string[] }) =>
       request<Monitor>('/api/monitors', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number; check_keyword: string | null; maintenance_start: string | null; maintenance_end: string | null; check_interval_seconds: number; custom_headers: string | null; monitor_type: string; port: number | null; check_regions: string }>) =>
+    update: (id: string, data: Partial<{ name: string; url: string; method: string; expected_status: number; timeout_ms: number; check_keyword: string | null; maintenance_start: string | null; maintenance_end: string | null; check_interval_seconds: number; custom_headers: string | null; monitor_type: string; port: number | null; check_regions: string; group_id: string | null }>) =>
       request<Monitor>(`/api/monitors/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     delete: (id: string) => request<{ success: boolean }>(`/api/monitors/${id}`, { method: 'DELETE' }),
     pause: (id: string) => request<Monitor>(`/api/monitors/${id}/pause`, { method: 'POST' }),
@@ -168,6 +168,32 @@ export const api = {
   turkey: {
     getDashboard: () => request<TurkeyDashboard>('/api/turkey'),
     getIncidents: () => request<TurkeyIncidentPublic[]>('/api/turkey/incidents'),
+  },
+  groups: {
+    list: () => request<MonitorGroup[]>('/api/groups'),
+    create: (data: { name: string; description?: string; color?: string }) =>
+      request<MonitorGroup>('/api/groups', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: Partial<{ name: string; description: string | null; color: string; sort_order: number }>) =>
+      request<MonitorGroup>(`/api/groups/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    delete: (id: string) => request<{ success: boolean }>(`/api/groups/${id}`, { method: 'DELETE' }),
+    reorder: (ids: string[]) => request<{ success: boolean }>('/api/groups/reorder', { method: 'PUT', body: JSON.stringify({ ids }) }),
+  },
+  tags: {
+    list: () => request<Tag[]>('/api/tags'),
+    create: (data: { name: string; color?: string }) =>
+      request<Tag>('/api/tags', { method: 'POST', body: JSON.stringify(data) }),
+    delete: (id: string) => request<{ success: boolean }>(`/api/tags/${id}`, { method: 'DELETE' }),
+    setMonitorTags: (monitorId: string, tagIds: string[]) =>
+      request<{ success: boolean }>(`/api/tags/monitors/${monitorId}`, { method: 'PUT', body: JSON.stringify({ tag_ids: tagIds }) }),
+  },
+  bulk: {
+    capacity: () => request<{ remaining: number; max: number }>('/api/bulk/capacity'),
+    importUrls: (data: { urls: string[]; group_id?: string | null; tag_ids?: string[]; check_interval_seconds?: number; timeout_ms?: number }) =>
+      request<BulkImportResult>('/api/bulk/urls', { method: 'POST', body: JSON.stringify(data) }),
+    fetchSitemap: (domain: string) =>
+      request<SitemapParseResult>('/api/bulk/sitemap', { method: 'POST', body: JSON.stringify({ domain }) }),
+    importPathBuilder: (data: { base_url: string; paths: string[]; group_id?: string | null; tag_ids?: string[]; check_interval_seconds?: number; timeout_ms?: number }) =>
+      request<BulkImportResult>('/api/bulk/path-builder', { method: 'POST', body: JSON.stringify(data) }),
   },
   blog: {
     list: (page = 1, limit = 10, category?: string) => {

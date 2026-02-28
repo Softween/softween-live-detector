@@ -13,6 +13,9 @@ import { slaRoutes } from './routes/sla.routes';
 import { webhookRoutes } from './routes/webhook.routes';
 import { turkeyRoutes } from './routes/turkey.routes';
 import { blogRoutes } from './routes/blog.routes';
+import { groupRoutes } from './routes/group.routes';
+import { tagRoutes } from './routes/tag.routes';
+import { bulkRoutes } from './routes/bulk.routes';
 import { handleScheduled } from './cron/scheduled';
 import type { Env } from './env';
 
@@ -38,6 +41,9 @@ app.route('/api/sla', slaRoutes);
 app.route('/api/webhooks', webhookRoutes);
 app.route('/api/turkey', turkeyRoutes);
 app.route('/api/blog', blogRoutes);
+app.route('/api/groups', groupRoutes);
+app.route('/api/tags', tagRoutes);
+app.route('/api/bulk', bulkRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

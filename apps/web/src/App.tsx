@@ -26,6 +26,8 @@ const Teams = lazy(() => import('./pages/Teams'));
 const TurkeyDashboard = lazy(() => import('./pages/TurkeyDashboard'));
 const BlogList = lazy(() => import('./pages/BlogList'));
 const BlogPostPage = lazy(() => import('./pages/BlogPost'));
+const ManageGroups = lazy(() => import('./pages/ManageGroups'));
+const BulkImport = lazy(() => import('./pages/BulkImport'));
 
 function PageLoader() {
   return (
@@ -67,8 +69,10 @@ export default function App() {
             <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/monitors/new" element={<AddMonitor />} />
+              <Route path="/monitors/bulk" element={<BulkImport />} />
               <Route path="/monitors/:id" element={<MonitorDetail />} />
               <Route path="/monitors/:id/edit" element={<EditMonitor />} />
+              <Route path="/groups" element={<ManageGroups />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/heartbeats" element={<Heartbeats />} />
               <Route path="/api-keys" element={<ApiKeys />} />

@@ -57,6 +57,16 @@ export default function Layout() {
                 {t('nav.settings')}
               </Link>
               <Link
+                to="/groups"
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                  isActive('/groups')
+                    ? 'text-zinc-100'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                Gruplar
+              </Link>
+              <Link
                 to="/heartbeats"
                 className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
                   isActive('/heartbeats')
@@ -133,6 +143,15 @@ export default function Layout() {
                 }`}
               >
                 {t('nav.settings')}
+              </Link>
+              <Link
+                to="/groups"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`block px-3 py-2 rounded-lg text-sm ${
+                  isActive('/groups') ? 'text-zinc-100 bg-white/[0.04]' : 'text-zinc-400'
+                }`}
+              >
+                Gruplar
               </Link>
               <Link
                 to="/heartbeats"

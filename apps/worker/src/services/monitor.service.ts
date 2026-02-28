@@ -1,13 +1,42 @@
 import { MAX_MONITORS_PER_USER } from 'shared';
-import type { Monitor } from 'shared';
+import type { Monitor, Tag } from 'shared';
 import type { Env } from '../env';
 
 export async function listMonitors(env: Env, userId: string): Promise<Monitor[]> {
   const result = await env.DB.prepare(
-    'SELECT * FROM monitors WHERE user_id = ? ORDER BY created_at DESC',
+    `SELECT m.*, g.name as group_name, g.color as group_color
+     FROM monitors m
+     LEFT JOIN monitor_groups g ON m.group_id = g.id
+     WHERE m.user_id = ?
+     ORDER BY g.sort_order ASC, m.created_at DESC`,
   )
     .bind(userId)
     .all<Monitor>();
+
+  // Fetch tags for all monitors in one query
+  if (result.results.length > 0) {
+    const monitorIds = result.results.map((m) => m.id);
+    const placeholders = monitorIds.map(() => '?').join(',');
+    const tagResult = await env.DB.prepare(
+      `SELECT mt.monitor_id, t.id, t.user_id, t.name, t.color, t.created_at
+       FROM monitor_tags mt
+       INNER JOIN tags t ON mt.tag_id = t.id
+       WHERE mt.monitor_id IN (${placeholders})`,
+    )
+      .bind(...monitorIds)
+      .all<Tag & { monitor_id: string }>();
+
+    const tagMap = new Map<string, Tag[]>();
+    for (const row of tagResult.results) {
+      const tags = tagMap.get(row.monitor_id) || [];
+      tags.push({ id: row.id, user_id: row.user_id, name: row.name, color: row.color, created_at: row.created_at });
+      tagMap.set(row.monitor_id, tags);
+    }
+
+    for (const monitor of result.results) {
+      monitor.tags = tagMap.get(monitor.id) || [];
+    }
+  }
 
   return result.results;
 }
@@ -37,6 +66,8 @@ export async function createMonitor(
     monitor_type?: string;
     port?: number;
     check_regions?: string;
+    group_id?: string | null;
+    tag_ids?: string[];
   },
 ): Promise<Monitor> {
   // Check monitor limit
@@ -54,8 +85,8 @@ export async function createMonitor(
   const keyword = data.check_keyword || null;
 
   await env.DB.prepare(
-    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms, check_keyword, check_interval_seconds, custom_headers, monitor_type, port, check_regions)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO monitors (id, user_id, name, url, method, expected_status, timeout_ms, check_keyword, check_interval_seconds, custom_headers, monitor_type, port, check_regions, group_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   )
     .bind(
       id,
@@ -71,8 +102,15 @@ export async function createMonitor(
       data.monitor_type || 'http',
       data.port || null,
       data.check_regions || null,
+      data.group_id || null,
     )
     .run();
+
+  // Assign tags if provided
+  if (data.tag_ids && data.tag_ids.length > 0) {
+    const { setMonitorTags } = await import('./tag.service');
+    await setMonitorTags(env, id, userId, data.tag_ids);
+  }
 
   return (await env.DB.prepare('SELECT * FROM monitors WHERE id = ?').bind(id).first<Monitor>())!;
 }
@@ -95,6 +133,7 @@ export async function updateMonitor(
     monitor_type: string;
     port: number | null;
     check_regions: string | null;
+    group_id: string | null;
   }>,
 ): Promise<Monitor | null> {
   const existing = await getMonitor(env, monitorId, userId);
@@ -154,6 +193,10 @@ export async function updateMonitor(
   if (data.check_regions !== undefined) {
     fields.push('check_regions = ?');
     values.push(data.check_regions || null);
+  }
+  if (data.group_id !== undefined) {
+    fields.push('group_id = ?');
+    values.push(data.group_id || null);
   }
 
   if (fields.length === 0) return existing;

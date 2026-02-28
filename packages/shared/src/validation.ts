@@ -41,6 +41,8 @@ export const createMonitorSchema = z.object({
   monitor_type: z.enum(['http', 'tcp', 'dns', 'ping']).optional().default('http'),
   port: z.number().int().min(1).max(65535).optional().or(z.null()),
   check_regions: z.string().max(200).optional().default('auto'),
+  group_id: z.string().optional().or(z.null()),
+  tag_ids: z.array(z.string()).max(10).optional(),
 });
 
 export const updateMonitorSchema = z.object({
@@ -57,6 +59,53 @@ export const updateMonitorSchema = z.object({
   monitor_type: z.enum(['http', 'tcp', 'dns', 'ping']).optional(),
   port: z.number().int().min(1).max(65535).optional().or(z.null()),
   check_regions: z.string().max(200).optional(),
+  group_id: z.string().optional().or(z.null()),
+});
+
+// Monitor Groups
+export const createGroupSchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(100),
+  description: z.string().max(500).optional().or(z.literal('')),
+  color: z.string().max(20).optional().default('#8b5cf6'),
+});
+
+export const updateGroupSchema = z.object({
+  name: z.string().min(1).max(100).optional(),
+  description: z.string().max(500).optional().or(z.literal('')).or(z.null()),
+  color: z.string().max(20).optional(),
+  sort_order: z.number().int().min(0).optional(),
+});
+
+// Tags
+export const createTagSchema = z.object({
+  name: z.string().min(1, 'İsim gerekli').max(50),
+  color: z.string().max(20).optional().default('#6366f1'),
+});
+
+export const setMonitorTagsSchema = z.object({
+  tag_ids: z.array(z.string()).max(10),
+});
+
+// Bulk Import
+export const bulkImportUrlsSchema = z.object({
+  urls: z.array(z.string().url()).min(1).max(25),
+  group_id: z.string().optional().or(z.null()),
+  tag_ids: z.array(z.string()).max(10).optional(),
+  check_interval_seconds: z.number().int().min(60).max(600).optional().default(300),
+  timeout_ms: z.number().int().min(1000).max(30000).optional().default(10000),
+});
+
+export const bulkImportSitemapSchema = z.object({
+  domain: z.string().url('Geçerli bir URL girin').max(2000),
+});
+
+export const bulkImportPathBuilderSchema = z.object({
+  base_url: z.string().url('Geçerli bir URL girin').max(2000),
+  paths: z.array(z.string().max(500)).min(1).max(25),
+  group_id: z.string().optional().or(z.null()),
+  tag_ids: z.array(z.string()).max(10).optional(),
+  check_interval_seconds: z.number().int().min(60).max(600).optional().default(300),
+  timeout_ms: z.number().int().min(1000).max(30000).optional().default(10000),
 });
 
 export const updateNotificationSettingsSchema = z.object({
@@ -136,3 +185,10 @@ export type InviteTeamMemberInput = z.infer<typeof inviteTeamMemberSchema>;
 export type IncidentUpdateInput = z.infer<typeof incidentUpdateSchema>;
 export type SubscribeStatusPageInput = z.infer<typeof subscribeStatusPageSchema>;
 export type Verify2FAInput = z.infer<typeof verify2FASchema>;
+export type CreateGroupInput = z.infer<typeof createGroupSchema>;
+export type UpdateGroupInput = z.infer<typeof updateGroupSchema>;
+export type CreateTagInput = z.infer<typeof createTagSchema>;
+export type SetMonitorTagsInput = z.infer<typeof setMonitorTagsSchema>;
+export type BulkImportUrlsInput = z.infer<typeof bulkImportUrlsSchema>;
+export type BulkImportSitemapInput = z.infer<typeof bulkImportSitemapSchema>;
+export type BulkImportPathBuilderInput = z.infer<typeof bulkImportPathBuilderSchema>;
