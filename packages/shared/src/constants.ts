@@ -22,7 +22,7 @@ export const GROUP_COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef444
 export const TURKEY_BATCH_SIZE = 15;
 export const TURKEY_CHECK_TIMEOUT_MS = 5000;
 export const TURKEY_DATA_RETENTION_DAYS = 90;
-export const TURKEY_CATEGORIES = ['ecommerce', 'banking', 'social', 'news', 'gov', 'telecom', 'food', 'travel', 'tech'] as const;
+export const TURKEY_CATEGORIES = ['ecommerce', 'banking', 'news', 'gov', 'telecom', 'tech'] as const;
 export const TURKEY_CATEGORY_LABELS: Record<string, { tr: string; en: string }> = {
   ecommerce: { tr: 'E-Ticaret', en: 'E-Commerce' },
   banking: { tr: 'Bankacılık', en: 'Banking' },

@@ -80,7 +80,7 @@ export default function StatusPage() {
       <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-20" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-gradient-radial from-violet-500/[0.05] via-transparent to-transparent" />
 
-      <div className="relative z-10 max-w-2xl mx-auto px-6 py-16">
+      <div className="relative z-10 max-w-2xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
         {/* Header */}
         <div className="flex items-center gap-2.5 mb-2">
           {data.logo_url ? (

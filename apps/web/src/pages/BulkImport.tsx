@@ -307,7 +307,7 @@ export default function BulkImport() {
 
       {/* Shared settings */}
       <div className="border-t border-white/[0.06] mt-6 pt-6 space-y-5">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="label">Kontrol Aralığı</label>
             <select value={checkInterval} onChange={(e) => setCheckInterval(Number(e.target.value))} className="input">

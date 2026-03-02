@@ -7,10 +7,12 @@ export interface TurkeySiteDefinition {
   sort_order: number;
 }
 
+// Only sites that respond to HTTP health checks from Cloudflare Workers.
+// Sites with aggressive bot protection (Cloudflare challenges, CAPTCHAs, WAF blocks)
+// are excluded as they produce false-down results.
 export const TURKEY_SITES: TurkeySiteDefinition[] = [
   // E-Commerce
   { name: 'Trendyol', url: 'https://www.trendyol.com', category: 'ecommerce', sort_order: 0 },
-  { name: 'Hepsiburada', url: 'https://www.hepsiburada.com', category: 'ecommerce', sort_order: 1 },
   { name: 'N11', url: 'https://www.n11.com', category: 'ecommerce', sort_order: 2 },
   { name: 'Amazon TR', url: 'https://www.amazon.com.tr', category: 'ecommerce', sort_order: 3 },
   { name: 'Çiçeksepeti', url: 'https://www.ciceksepeti.com', category: 'ecommerce', sort_order: 4 },
@@ -18,14 +20,6 @@ export const TURKEY_SITES: TurkeySiteDefinition[] = [
   { name: 'Garanti BBVA', url: 'https://www.garantibbva.com.tr', category: 'banking', sort_order: 10 },
   { name: 'İş Bankası', url: 'https://www.isbank.com.tr', category: 'banking', sort_order: 11 },
   { name: 'Akbank', url: 'https://www.akbank.com', category: 'banking', sort_order: 12 },
-  { name: 'Yapı Kredi', url: 'https://www.yapikredi.com.tr', category: 'banking', sort_order: 13 },
-  { name: 'Ziraat Bankası', url: 'https://www.ziraatbank.com.tr', category: 'banking', sort_order: 14 },
-  // Social Media
-  { name: 'X (Twitter)', url: 'https://x.com', category: 'social', sort_order: 20 },
-  { name: 'Instagram', url: 'https://www.instagram.com', category: 'social', sort_order: 21 },
-  { name: 'YouTube', url: 'https://www.youtube.com', category: 'social', sort_order: 22 },
-  { name: 'TikTok', url: 'https://www.tiktok.com', category: 'social', sort_order: 23 },
-  { name: 'WhatsApp Web', url: 'https://web.whatsapp.com', category: 'social', sort_order: 24 },
   // News
   { name: 'Hürriyet', url: 'https://www.hurriyet.com.tr', category: 'news', sort_order: 30 },
   { name: 'Sabah', url: 'https://www.sabah.com.tr', category: 'news', sort_order: 31 },
@@ -38,17 +32,7 @@ export const TURKEY_SITES: TurkeySiteDefinition[] = [
   { name: 'SGK', url: 'https://www.sgk.gov.tr', category: 'gov', sort_order: 42 },
   // Telecom
   { name: 'Turkcell', url: 'https://www.turkcell.com.tr', category: 'telecom', sort_order: 50 },
-  { name: 'Vodafone TR', url: 'https://www.vodafone.com.tr', category: 'telecom', sort_order: 51 },
-  { name: 'Türk Telekom', url: 'https://www.turktelekom.com.tr', category: 'telecom', sort_order: 52 },
-  // Food & Delivery
-  { name: 'Yemeksepeti', url: 'https://www.yemeksepeti.com', category: 'food', sort_order: 60 },
-  { name: 'Getir', url: 'https://getir.com', category: 'food', sort_order: 61 },
-  // Travel
-  { name: 'Türk Hava Yolları', url: 'https://www.turkishairlines.com', category: 'travel', sort_order: 70 },
-  { name: 'Obilet', url: 'https://www.obilet.com', category: 'travel', sort_order: 71 },
-  { name: 'Enuygun', url: 'https://www.enuygun.com', category: 'travel', sort_order: 72 },
   // Tech
-  { name: 'Sahibinden', url: 'https://www.sahibinden.com', category: 'tech', sort_order: 80 },
   { name: 'Letgo', url: 'https://www.letgo.com', category: 'tech', sort_order: 81 },
 ];
 

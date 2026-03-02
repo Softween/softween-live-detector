@@ -169,7 +169,7 @@ export default function EditMonitor() {
         )}
 
         {monitorType === 'http' && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">{t('monitor.httpMethod')}</label>
               <select value={method} onChange={(e) => setMethod(e.target.value)} className="input">
@@ -266,7 +266,7 @@ export default function EditMonitor() {
         <div className="border-t border-white/[0.06] pt-5">
           <label className="label mb-3">{t('monitor.maintenanceWindow')}</label>
           <p className="text-xs text-zinc-600 mb-3">{t('monitor.maintenanceDesc')}</p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label text-[10px]">{t('monitor.maintenanceStart')}</label>
               <input

@@ -24,7 +24,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-[#09090b]">
       <header className="border-b border-white/[0.04] bg-[#09090b]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <Link to="/dashboard" className="flex items-center gap-2.5">
               <div className="w-6 h-6 rounded-md bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center">
@@ -183,7 +183,7 @@ export default function Layout() {
         )}
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <Outlet />
       </main>
     </div>

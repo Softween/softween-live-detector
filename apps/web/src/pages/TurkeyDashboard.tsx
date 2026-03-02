@@ -123,7 +123,7 @@ export default function TurkeyDashboard() {
       <div className="min-h-screen bg-[#09090b] relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-30" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-radial from-violet-500/[0.07] via-transparent to-transparent" />
-        <div className="relative z-10 max-w-5xl mx-auto px-6 py-16">
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-16">
           <div className="flex items-center justify-center mb-12">
             <Spinner size="md" />
           </div>
@@ -160,7 +160,7 @@ export default function TurkeyDashboard() {
 
       {/* Header */}
       <header className="relative z-10 border-b border-white/[0.04]">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-lg shadow-violet-500/20">
@@ -184,7 +184,7 @@ export default function TurkeyDashboard() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-10">
+      <main className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-10">
         {/* Subtitle */}
         <p className="text-sm text-zinc-500 mb-8">{t('turkey.subtitle')}</p>
 

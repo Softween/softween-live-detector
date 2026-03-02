@@ -183,7 +183,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
         <h1 className="text-xl font-bold tracking-tight text-zinc-100">{t('dashboard.title')}</h1>
         <div className="flex items-center gap-2">
           <Link to="/monitors/bulk" className="btn-secondary text-xs">

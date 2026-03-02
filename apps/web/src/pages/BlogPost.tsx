@@ -105,7 +105,7 @@ export default function BlogPost() {
 
       {/* Header */}
       <header className="relative z-10 border-b border-white/[0.04]">
-        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-lg shadow-violet-500/20">
@@ -128,7 +128,7 @@ export default function BlogPost() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-4xl mx-auto px-6 py-10">
+      <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-10">
         <div className="lg:grid lg:grid-cols-[1fr_280px] lg:gap-10">
           {/* Article */}
           <article className="min-w-0">

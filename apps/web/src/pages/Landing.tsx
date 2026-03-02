@@ -19,7 +19,7 @@ export default function Landing() {
 
       {/* Header */}
       <header className="relative z-10 border-b border-white/[0.04]">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-violet-700 flex items-center justify-center shadow-lg shadow-violet-500/20">
               <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -41,7 +41,7 @@ export default function Landing() {
       </header>
 
       {/* Hero */}
-      <main className="relative z-10 max-w-3xl mx-auto px-6 pt-28 sm:pt-36 pb-20 text-center">
+      <main className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pt-20 sm:pt-36 pb-20 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/[0.06] bg-white/[0.03] text-xs text-zinc-400 mb-8">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -50,7 +50,7 @@ export default function Landing() {
           {t('landing.badge')}
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gradient leading-[1.1]">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight text-gradient leading-[1.1]">
           {t('landing.title')}
         </h1>
 
