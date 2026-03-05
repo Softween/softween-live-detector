@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import mixpanel from 'mixpanel-browser';
 import { useAuth } from '../hooks/useAuth';
 import { useSEO } from '../hooks/useSEO';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
@@ -30,6 +31,13 @@ export default function Register() {
 
     try {
       await register(email, password, name);
+      const params = new URLSearchParams(window.location.search);
+      mixpanel.track('Sign Up', {
+        signup_method: 'email',
+        utm_source: params.get('utm_source') || undefined,
+        utm_medium: params.get('utm_medium') || undefined,
+        utm_campaign: params.get('utm_campaign') || undefined,
+      });
       navigate('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('auth.registerFailed'));

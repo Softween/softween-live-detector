@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import mixpanel from 'mixpanel-browser';
 import { useAuth } from '../hooks/useAuth';
 import { useSEO } from '../hooks/useSEO';
 import LanguageSwitcher from '../components/ui/LanguageSwitcher';
@@ -22,8 +23,16 @@ export default function Login() {
 
     try {
       await login(email, password);
+      mixpanel.track('Sign In', {
+        login_method: 'email',
+        success: true,
+      });
       navigate('/dashboard');
     } catch (err: unknown) {
+      mixpanel.track('Sign In', {
+        login_method: 'email',
+        success: false,
+      });
       setError(err instanceof Error ? err.message : t('auth.loginFailed'));
     } finally {
       setLoading(false);

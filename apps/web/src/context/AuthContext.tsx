@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react';
+import mixpanel from 'mixpanel-browser';
 import { api } from '../api/client';
 
 interface User {
@@ -34,16 +35,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const userData = await api.auth.login({ email, password });
     setUser(userData);
+    mixpanel.identify(userData.id);
+    mixpanel.people.set({ '$name': userData.name, '$email': userData.email });
   }
 
   async function register(email: string, password: string, name: string) {
     const userData = await api.auth.register({ email, password, name });
     setUser(userData);
+    mixpanel.identify(userData.id);
+    mixpanel.people.set({ '$name': userData.name, '$email': userData.email });
   }
 
   async function logout() {
     await api.auth.logout();
     setUser(null);
+    mixpanel.reset();
   }
 
   async function refreshUser() {

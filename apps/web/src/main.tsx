@@ -2,10 +2,19 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import mixpanel from 'mixpanel-browser';
 import { AuthProvider } from './context/AuthContext';
 import App from './App';
 import './i18n';
 import './index.css';
+
+mixpanel.init('6c0eca6726c12dd30b4e4a1cdef97adc', {
+  debug: false,
+  track_pageview: true,
+  persistence: 'localStorage',
+  autocapture: true,
+  record_sessions_percent: 100,
+});
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

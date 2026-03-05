@@ -1,4 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
+import mixpanel from 'mixpanel-browser';
 import i18n from '../../i18n';
 
 interface Props { children: ReactNode }
@@ -13,6 +14,12 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('ErrorBoundary:', error, info);
+    mixpanel.track('Error', {
+      error_type: 'runtime',
+      error_message: error.message,
+      error_code: error.name,
+      page_url: window.location.href,
+    });
   }
 
   render() {

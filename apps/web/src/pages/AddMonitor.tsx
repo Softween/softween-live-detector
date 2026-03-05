@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import mixpanel from 'mixpanel-browser';
 import toast from 'react-hot-toast';
 import { api } from '../api/client';
 import GroupSelector from '../components/GroupSelector';
@@ -62,6 +63,10 @@ export default function AddMonitor() {
         tag_ids: tagIds.length > 0 ? tagIds : undefined,
       } as any);
       toast.success(t('monitor.createSuccess'));
+      mixpanel.track('Conversion', {
+        'Conversion Type': 'monitor_created',
+        'Conversion Value': monitorType,
+      });
 
       // Trigger first ping immediately
       toast.loading(t('monitor.firstPing'), { id: 'first-ping' });
