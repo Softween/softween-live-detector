@@ -9,5 +9,12 @@ Disallow: /monitors/
 Disallow: /settings
 Disallow: /login
 Disallow: /register
+Disallow: /api/
+Disallow: /verify-email
+Disallow: /reset-password
+Disallow: /forgot-password
+Disallow: /bulk-import
+Disallow: /manage-groups
+Crawl-delay: 2
 
 Sitemap: https://livedetector.softween.com/sitemap.xml

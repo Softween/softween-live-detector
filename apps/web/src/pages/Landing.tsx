@@ -7,8 +7,13 @@ export default function Landing() {
   const { t, i18n } = useTranslation();
 
   useSEO({
-    title: 'Free Uptime Monitoring & Status Pages',
-    description: 'Monitor your websites with 5-minute interval checks. Get instant email and webhook alerts when your sites go down. Free public status pages and uptime badges.',
+    title: i18n.language === 'tr'
+      ? 'Ücretsiz Uptime İzleme & Durum Sayfaları'
+      : 'Free Uptime Monitoring & Status Pages',
+    description: i18n.language === 'tr'
+      ? 'Web sitelerinizi 5 dakika aralıklarla izleyin. Siteleriniz çökünce anında e-posta, Discord ve Slack bildirimi alın. Ücretsiz durum sayfaları, 90 günlük geçmiş ve gömülebilir rozetler.'
+      : 'Monitor your websites with 5-minute interval checks. Get instant email, Discord & Slack alerts when sites go down. Free public status pages, 90-day uptime history, and embeddable badges.',
+    ogType: 'website',
   });
 
   return (

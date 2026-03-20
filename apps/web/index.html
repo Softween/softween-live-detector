@@ -7,8 +7,8 @@
 
     <!-- Primary SEO -->
     <title>LiveDetector - Free Uptime Monitoring & Status Pages</title>
-    <meta name="description" content="Monitor your websites with 5-minute interval checks. Get instant email and webhook alerts when your sites go down. Free public status pages, 90-day uptime history, and embeddable badges." />
-    <meta name="keywords" content="uptime monitoring, website monitoring, status page, uptime checker, site down alert, server monitoring, webhook notifications, uptime badge" />
+    <meta name="description" content="Free uptime monitoring with 5-minute checks. Get instant email, Discord & Slack alerts when sites go down. Public status pages, 90-day history, embeddable badges. Monitor Turkey's top websites live." />
+    <meta name="keywords" content="uptime monitoring, website monitoring, status page, uptime checker, site down alert, server monitoring, webhook notifications, uptime badge, site izleme, web sitesi takip, sunucu izleme, durum sayfasi, Turkey website status, free monitoring tool, Discord alerts, Slack notifications" />
     <meta name="author" content="Softween" />
     <link rel="canonical" href="https://livedetector.softween.com" />
 
@@ -39,9 +39,13 @@
     <link rel="alternate" hreflang="tr" href="https://livedetector.softween.com" />
     <link rel="alternate" hreflang="x-default" href="https://livedetector.softween.com" />
 
-    <!-- Fonts -->
+    <!-- Preconnect hints -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Structured Data -->
@@ -72,6 +76,28 @@
         "Embeddable uptime badges",
         "Discord and Slack webhook support"
       ]
+    }
+    </script>
+
+    <!-- WebSite structured data with SearchAction -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "LiveDetector",
+      "url": "https://livedetector.softween.com",
+      "description": "Free uptime monitoring tool with instant alerts, public status pages, and embeddable badges.",
+      "inLanguage": ["en", "tr"],
+      "publisher": {
+        "@type": "Organization",
+        "name": "Softween",
+        "url": "https://softween.com"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://livedetector.softween.com/status/{search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
   </head>

@@ -322,7 +322,12 @@
     "cancel": "Cancel"
   },
   "footer": {
-    "visitors": "visitors"
+    "visitors": "visitors",
+    "softweenProducts": "Softween Products",
+    "calculators": "Calculators",
+    "devTools": "Developer Tools",
+    "examWorld": "Exam World",
+    "softween": "Softween"
   },
   "heartbeats": {
     "title": "Heartbeat Monitors",
