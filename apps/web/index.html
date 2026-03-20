@@ -30,6 +30,15 @@
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large" />
 
+    <!-- Critical CSS: inline to avoid render-blocking and speed up FCP -->
+    <style>
+      body{margin:0;background:#09090b;color:#e4e4e7;font-family:Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+      #root{min-height:100vh}
+      .spinner-initial{display:flex;align-items:center;justify-content:center;min-height:100vh}
+      .spinner-initial::after{content:'';width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:#8b5cf6;border-radius:50%;animation:spin .6s linear infinite}
+      @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
@@ -39,23 +48,38 @@
     <link rel="alternate" hreflang="tr" href="https://livedetector.softween.com" />
     <link rel="alternate" hreflang="x-default" href="https://livedetector.softween.com" />
 
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-VG027K5J5X"></script>
+    <!-- Preconnect hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+    <!-- Fonts: loaded async to avoid render blocking (340-1370ms saving) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
+
+    <!-- Google Analytics: deferred to avoid blocking FCP/TBT -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-VG027K5J5X', { page_path: window.location.pathname });
+      // Load gtag.js after page becomes interactive
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-VG027K5J5X';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      } else {
+        window.addEventListener('load', function() {
+          var s = document.createElement('script');
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-VG027K5J5X';
+          s.async = true;
+          document.head.appendChild(s);
+        });
+      }
     </script>
-
-    <!-- Preconnect hints -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
     <!-- Structured Data -->
     <script type="application/ld+json">
@@ -128,7 +152,7 @@
         <p><a href="https://livedetector.softween.com/register" style="color:#8b5cf6">Get Started Free</a></p>
       </div>
     </noscript>
-    <div id="root"></div>
+    <div id="root"><div class="spinner-initial"></div></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

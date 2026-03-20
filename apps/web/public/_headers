@@ -1,0 +1,36 @@
+# Cache policy for static assets (Cloudflare Pages)
+# Fixes Lighthouse "Serve static assets with an efficient cache policy" (157-158KB savings)
+
+# Hashed assets (JS/CSS chunks) - immutable, cache for 1 year
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Fonts and images - cache for 30 days
+/*.svg
+  Cache-Control: public, max-age=2592000, immutable
+
+/*.ico
+  Cache-Control: public, max-age=2592000
+
+/*.png
+  Cache-Control: public, max-age=2592000
+
+/*.jpg
+  Cache-Control: public, max-age=2592000
+
+/*.webp
+  Cache-Control: public, max-age=2592000
+
+# HTML pages - revalidate every time
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Sitemap and robots
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400

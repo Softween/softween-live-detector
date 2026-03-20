@@ -20,6 +20,11 @@
     "recharts": "^2.15.0",
     "shared": "workspace:*"
   },
+  "browserslist": [
+    "defaults and supports es6-module",
+    "not dead",
+    "not op_mini all"
+  ],
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
