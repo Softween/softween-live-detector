@@ -36,6 +36,8 @@ export async function handleScheduled(
   _controller: ScheduledController,
   env: Env,
 ): Promise<void> {
+  const cronStart = Date.now();
+
   // 1. Fetch all active monitors
   const monitors = await env.DB.prepare(
     'SELECT id, url, method, expected_status, timeout_ms, current_status, check_keyword, maintenance_start, maintenance_end, check_interval_seconds, custom_headers, monitor_type, port FROM monitors WHERE is_active = 1',
@@ -89,18 +91,18 @@ export async function handleScheduled(
 
   await env.DB.batch([...insertStatements, ...updateStatements]);
 
-  // 6. Handle status changes (incidents + notifications)
+  // 6. Handle status changes (incidents + notifications) — parallelized
   const statusChanges = results.filter((r) => r.statusChanged);
-  for (const change of statusChanges) {
-    await handleStatusChange(change, env);
-  }
+  await Promise.allSettled(
+    statusChanges.map((change) => handleStatusChange(change, env)),
+  );
 
-  // 7. Check for slow responses
-  for (const result of results) {
-    if (result.status === 'up' && result.responseTime) {
-      await sendSlowResponseNotification(result.monitorId, result.responseTime, env);
-    }
-  }
+  // 7. Check for slow responses — parallelized
+  await Promise.allSettled(
+    results
+      .filter((r) => r.status === 'up' && r.responseTime)
+      .map((r) => sendSlowResponseNotification(r.monitorId, r.responseTime!, env)),
+  );
 
   // 8. Run daily cleanup
   await runCleanup(env);
@@ -134,6 +136,15 @@ export async function handleScheduled(
     await generateAIBlogContent(env);
     await env.KV.put('cron:last_ai_blog_gen', weekKey);
   }
+
+  // Log cron execution summary
+  const cronDuration = Date.now() - cronStart;
+  console.log(JSON.stringify({
+    event: 'cron_complete',
+    durationMs: cronDuration,
+    monitorsChecked: batch.length,
+    statusChanges: statusChanges.length,
+  }));
 }
 
 async function handleTurkeyChecks(env: Env): Promise<void> {
@@ -178,21 +189,21 @@ async function handleTurkeyChecks(env: Env): Promise<void> {
   );
   await env.DB.batch(updateBatch);
 
-  // Handle status changes - create/resolve incidents
-  for (const result of results) {
-    if (result.previousStatus === 'up' && result.status === 'down') {
-      await env.DB.prepare(
-        'INSERT INTO turkey_incidents (id, site_id, cause) VALUES (?, ?, ?)',
-      )
-        .bind(crypto.randomUUID(), result.siteId, result.error)
-        .run();
-    } else if (result.previousStatus === 'down' && result.status === 'up') {
-      await env.DB.prepare(
-        "UPDATE turkey_incidents SET resolved_at = datetime('now') WHERE site_id = ? AND resolved_at IS NULL",
-      )
-        .bind(result.siteId)
-        .run();
-    }
+  // Handle status changes - create/resolve incidents (batched)
+  const incidentInserts = results
+    .filter((r) => r.previousStatus === 'up' && r.status === 'down')
+    .map((r) =>
+      env.DB.prepare('INSERT INTO turkey_incidents (id, site_id, cause) VALUES (?, ?, ?)')
+        .bind(crypto.randomUUID(), r.siteId, r.error),
+    );
+  const incidentResolves = results
+    .filter((r) => r.previousStatus === 'down' && r.status === 'up')
+    .map((r) =>
+      env.DB.prepare("UPDATE turkey_incidents SET resolved_at = datetime('now') WHERE site_id = ? AND resolved_at IS NULL")
+        .bind(r.siteId),
+    );
+  if (incidentInserts.length > 0 || incidentResolves.length > 0) {
+    await env.DB.batch([...incidentInserts, ...incidentResolves]);
   }
 }
 
