@@ -1,4 +1,4 @@
-const RESEND_API_URL = 'https://api.resend.com/emails';
+import { sendViaGmail, isGmailConfigured } from './gmail';
 
 interface SendEmailParams {
   to: string;
@@ -6,23 +6,58 @@ interface SendEmailParams {
   html: string;
 }
 
-export async function sendEmail(params: SendEmailParams, apiKey: string): Promise<boolean> {
+interface GmailEnv {
+  GMAIL_CLIENT_EMAIL?: string;
+  GMAIL_PRIVATE_KEY?: string;
+  GMAIL_SENDER_EMAIL?: string;
+}
+
+// Circuit breaker (in-memory, resets on worker restart)
+let failCount = 0;
+let openedAt = 0;
+const FAIL_THRESHOLD = 3;
+const COOLDOWN_MS = 60_000;
+
+function isCircuitOpen(): boolean {
+  if (failCount < FAIL_THRESHOLD) return false;
+  if (Date.now() - openedAt >= COOLDOWN_MS) {
+    failCount = 0; // half-open: try again
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Send an email via Gmail REST API.
+ *
+ * @param params  - to, subject, html
+ * @param _apiKey - DEPRECATED (kept for backward compat, unused)
+ * @param env     - Worker env with GMAIL_CLIENT_EMAIL, GMAIL_PRIVATE_KEY, GMAIL_SENDER_EMAIL
+ */
+export async function sendEmail(params: SendEmailParams, _apiKey: string, env?: GmailEnv): Promise<boolean> {
+  if (!env || !isGmailConfigured(env)) {
+    console.error('Gmail not configured for email sending');
+    return false;
+  }
+
+  if (isCircuitOpen()) {
+    console.error('Gmail circuit breaker open — skipping send');
+    return false;
+  }
+
   try {
-    const response = await fetch(RESEND_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'LiveDetector <alerts@softween.com>',
-        to: params.to,
-        subject: params.subject,
-        html: params.html,
-      }),
+    await sendViaGmail(env, {
+      to: params.to,
+      subject: params.subject,
+      html: params.html,
+      from: `LiveDetector <${env.GMAIL_SENDER_EMAIL}>`,
     });
-    return response.ok;
-  } catch {
+    failCount = 0;
+    return true;
+  } catch (err) {
+    failCount++;
+    openedAt = Date.now();
+    console.error('Gmail send failed:', err);
     return false;
   }
 }

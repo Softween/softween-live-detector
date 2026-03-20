@@ -53,7 +53,7 @@ auth.post('/register', async (c) => {
             to: user.email,
             subject: 'LiveDetector - Email Doğrulama',
             html: buildEmailVerificationHtml(verifyUrl),
-          }, c.env.RESEND_API_KEY);
+          }, '', c.env);
         } catch { /* verification email is best-effort */ }
 
         try {
@@ -136,7 +136,7 @@ auth.post('/forgot-password', async (c) => {
         to: parsed.data.email,
         subject: 'LiveDetector - Şifre Sıfırlama',
         html: buildPasswordResetEmailHtml(resetUrl),
-      }, c.env.RESEND_API_KEY),
+      }, '', c.env),
     );
   }
 
@@ -194,7 +194,7 @@ auth.post('/resend-verification', authMiddleware, async (c) => {
       to: userEmail,
       subject: 'LiveDetector - Email Doğrulama',
       html: buildEmailVerificationHtml(verifyUrl),
-    }, c.env.RESEND_API_KEY),
+    }, '', c.env),
   );
 
   return c.json({ success: true });

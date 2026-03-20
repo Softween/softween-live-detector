@@ -71,7 +71,7 @@ export async function sendStatusNotification(
       ? buildDownEmailHtml(monitor.name, monitor.url, errorMessage || 'Bilinmeyen hata')
       : buildUpEmailHtml(monitor.name, monitor.url);
 
-  const sent = await sendEmail({ to: monitor.email, subject, html }, env.RESEND_API_KEY);
+  const sent = await sendEmail({ to: monitor.email, subject, html }, '', env);
 
   if (sent) {
     await env.DB.prepare(
@@ -170,7 +170,7 @@ export async function sendSlowResponseNotification(
   const subject = `[SLOW] ${monitor.name} yavaş yanıt veriyor (${responseTime}ms)`;
   const html = buildSlowResponseEmailHtml(monitor.name, monitor.url, responseTime, monitor.slow_threshold_ms);
 
-  const sent = await sendEmail({ to: monitor.email, subject, html }, env.RESEND_API_KEY);
+  const sent = await sendEmail({ to: monitor.email, subject, html }, '', env);
 
   if (sent) {
     await env.DB.prepare(

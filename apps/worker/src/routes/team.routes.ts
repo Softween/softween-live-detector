@@ -57,7 +57,7 @@ teams.post('/invite', authMiddleware, async (c) => {
         <a href="${inviteUrl}" style="display:inline-block;background:#7c3aed;color:white;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:600;margin:16px 0;">Daveti Kabul Et</a>
         <p style="color:#6b7280;font-size:12px;">LiveDetector</p>
       </div>`,
-    }, c.env.RESEND_API_KEY),
+    }, '', c.env),
   );
 
   return c.json({ success: true });
