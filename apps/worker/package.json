@@ -12,12 +12,12 @@
   },
   "dependencies": {
     "@sentry/cloudflare": "^10.46.0",
-    "hono": "^4.6.0",
+    "hono": "^4.12.9",
     "shared": "workspace:*",
     "zod": "^3.23.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20241106.0",
+    "@cloudflare/workers-types": "^4.20260317.1",
     "typescript": "^5.5.0",
     "wrangler": "^3.91.0"
   }
