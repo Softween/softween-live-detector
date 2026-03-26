@@ -16,6 +16,7 @@ import { blogRoutes } from './routes/blog.routes';
 import { groupRoutes } from './routes/group.routes';
 import { tagRoutes } from './routes/tag.routes';
 import { bulkRoutes } from './routes/bulk.routes';
+import { sitemapRoutes } from './routes/sitemap.routes';
 import { handleScheduled } from './cron/scheduled';
 import type { Env } from './env';
 
@@ -44,6 +45,8 @@ app.route('/api/blog', blogRoutes);
 app.route('/api/groups', groupRoutes);
 app.route('/api/tags', tagRoutes);
 app.route('/api/bulk', bulkRoutes);
+
+app.route('/api/sitemap', sitemapRoutes);
 
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', timestamp: new Date().toISOString() }));

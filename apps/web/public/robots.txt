@@ -18,3 +18,4 @@ Disallow: /manage-groups
 Crawl-delay: 2
 
 Sitemap: https://livedetector.softween.com/sitemap.xml
+Sitemap: https://livedetector.softween.com/api/sitemap
