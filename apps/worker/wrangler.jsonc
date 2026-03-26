@@ -28,7 +28,8 @@
   //   GMAIL_SENDER_EMAIL  - alerts@softween.com (delegated sender)
   "vars": {
     "ENVIRONMENT": "production",
-    "FRONTEND_URL": "https://livedetector.softween.com"
+    "FRONTEND_URL": "https://livedetector.softween.com",
+    "SENTRY_RELEASE": "softween-live-detector@0.0.1"
   },
   "triggers": {
     "crons": ["*/5 * * * *"]

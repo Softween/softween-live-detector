@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { withSentryHandlers } from './lib/sentry';
 import { createCors } from './middleware/cors';
 import { authRoutes } from './routes/auth.routes';
 import { monitorRoutes } from './routes/monitors.routes';
@@ -63,9 +64,9 @@ app.onError((err, c) => {
   return c.json({ error: 'Internal server error' }, 500);
 });
 
-export default {
+export default withSentryHandlers({
   fetch: app.fetch,
   async scheduled(controller: ScheduledController, env: Env, ctx: ExecutionContext) {
     ctx.waitUntil(handleScheduled(controller, env));
   },
-};
+});

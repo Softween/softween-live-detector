@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@sentry/react": "^10.46.0",
     "i18next": "^25.8.13",
     "mixpanel-browser": "^2.75.0",
     "react": "^19.0.0",

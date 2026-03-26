@@ -3,9 +3,13 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
+import { initSentry } from './lib/sentry';
 import App from './App';
 import './i18n';
 import './index.css';
+
+// Initialize Sentry before rendering
+initSentry();
 
 // Defer Mixpanel initialization to reduce TBT (Total Blocking Time)
 // Mixpanel is non-critical for initial render

@@ -8,6 +8,7 @@ export interface Env {
   ENVIRONMENT: string;
   FRONTEND_URL: string;
   SERPAPI_KEY?: string;
+  SENTRY_RELEASE?: string;
   // Gmail REST API credentials (service account with domain-wide delegation)
   GMAIL_CLIENT_EMAIL: string;
   GMAIL_PRIVATE_KEY: string;
