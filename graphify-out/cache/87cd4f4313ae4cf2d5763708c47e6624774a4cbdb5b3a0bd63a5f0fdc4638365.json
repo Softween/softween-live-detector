@@ -1,0 +1,1 @@
+{"nodes": [{"id": "uptimebar", "label": "UptimeBar.tsx", "file_type": "code", "source_file": "apps/web/src/components/ui/UptimeBar.tsx", "source_location": "L1"}], "edges": [{"source": "uptimebar", "target": "shared", "relation": "imports_from", "confidence": "EXTRACTED", "source_file": "apps/web/src/components/ui/UptimeBar.tsx", "source_location": "L1", "weight": 1.0}]}
