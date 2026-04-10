@@ -71,6 +71,9 @@ importers:
       '@sentry/cloudflare':
         specifier: ^10.46.0
         version: 10.46.0(@cloudflare/workers-types@4.20260302.0)
+      '@softween/workers-ai-utils':
+        specifier: file:../../../softween-workers-ai-utils
+        version: file:../softween-workers-ai-utils
       hono:
         specifier: ^4.6.0
         version: 4.12.2
@@ -876,6 +879,9 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       react: ^16.14.0 || 17.x || 18.x || 19.x
+
+  '@softween/workers-ai-utils@file:../softween-workers-ai-utils':
+    resolution: {directory: ../softween-workers-ai-utils, type: directory}
 
   '@types/babel__core@7.20.5':
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}
@@ -2317,6 +2323,8 @@ snapshots:
       '@sentry/browser': 10.46.0
       '@sentry/core': 10.46.0
       react: 19.2.4
+
+  '@softween/workers-ai-utils@file:../softween-workers-ai-utils': {}
 
   '@types/babel__core@7.20.5':
     dependencies:
