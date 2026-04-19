@@ -8,3 +8,5 @@ dist/
 .DS_Store
 .turbo/
 *.tsbuildinfo
+graphify-out/cache/
+src/graphify-out/
