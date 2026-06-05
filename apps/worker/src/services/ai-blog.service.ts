@@ -1,6 +1,6 @@
 import type { Env } from '../env';
 import { fetchTurkeyTrends, getWeeklyOutageData, getPerformanceRankings, cacheTrends } from './trends.service';
-import { slugify } from '@softween/workers-ai-utils';
+import { slugify } from '../lib/slugify';
 
 interface AiResponse {
   response?: string;

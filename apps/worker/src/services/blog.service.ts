@@ -1,7 +1,7 @@
 import type { Env } from '../env';
 import { BLOG_POSTS_PER_PAGE } from 'shared';
 import { fetchTurkeyTrends, getWeeklyOutageData, getPerformanceRankings, cacheTrends } from './trends.service';
-import { slugify } from '@softween/workers-ai-utils';
+import { slugify } from '../lib/slugify';
 
 function formatDate(d: Date): string {
   return d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
