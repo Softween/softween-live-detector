@@ -72,7 +72,10 @@ auth.post('/register', async (c) => {
             expected_status: sample.expected_status,
             timeout_ms: sample.timeout_ms,
             current_status: sample.current_status,
-            check_keyword: null,
+            check_keyword: sample.check_keyword,
+            custom_headers: sample.custom_headers,
+            monitor_type: sample.monitor_type,
+            port: sample.port,
           });
           await c.env.DB.prepare(
             `INSERT INTO checks (id, monitor_id, status, status_code, response_time_ms, error_message) VALUES (?, ?, ?, ?, ?, ?)`,

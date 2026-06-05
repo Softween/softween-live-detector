@@ -64,7 +64,7 @@ export async function createMonitor(
     check_interval_seconds?: number;
     custom_headers?: string;
     monitor_type?: string;
-    port?: number;
+    port?: number | null;
     check_regions?: string;
     group_id?: string | null;
     tag_ids?: string[];

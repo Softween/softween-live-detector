@@ -56,7 +56,7 @@ bulk.post('/sitemap', async (c) => {
   }
 
   try {
-    const result = await fetchSitemapUrls(c.env, parsed.data.domain);
+    const result = await fetchSitemapUrls(parsed.data.domain);
     return c.json(result);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Sitemap alınamadı';
