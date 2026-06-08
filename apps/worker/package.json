@@ -14,7 +14,7 @@
     "@sentry/cloudflare": "^10.46.0",
     "hono": "^4.6.0",
     "shared": "workspace:*",
-    "zod": "^3.23.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241106.0",
