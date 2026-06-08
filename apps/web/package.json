@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@sentry/react": "^10.46.0",
-    "i18next": "^25.8.13",
+    "i18next": "^26.3.1",
     "mixpanel-browser": "^2.75.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
