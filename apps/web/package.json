@@ -16,7 +16,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",
-    "react-i18next": "^16.5.4",
+    "react-i18next": "^17.0.8",
     "react-router-dom": "^7.1.0",
     "recharts": "^2.15.0",
     "shared": "workspace:*"
