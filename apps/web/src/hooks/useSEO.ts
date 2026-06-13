@@ -4,6 +4,8 @@ interface SEOProps {
   title?: string;
   description?: string;
   noindex?: boolean;
+  /** Override the canonical URL. Defaults to current origin + pathname (query/hash stripped). */
+  canonical?: string;
   ogType?: 'website' | 'article';
   ogImage?: string;
   article?: {
@@ -13,7 +15,7 @@ interface SEOProps {
   };
 }
 
-export function useSEO({ title, description, noindex, ogType, ogImage, article }: SEOProps) {
+export function useSEO({ title, description, noindex, canonical, ogType, ogImage, article }: SEOProps) {
   useEffect(() => {
     const suffix = 'LiveDetector';
     const fullTitle = title ? `${title} | ${suffix}` : `${suffix} - Free Uptime Monitoring & Status Pages`;
@@ -25,11 +27,16 @@ export function useSEO({ title, description, noindex, ogType, ogImage, article }
     // Robots
     setMeta('robots', noindex ? 'noindex, nofollow' : 'index, follow');
 
+    // Canonical — self-referential per route so non-home pages aren't folded
+    // into the homepage canonical (which left /blog, /turkiye, /blog/* unindexed).
+    const canonicalUrl = canonical || `${window.location.origin}${window.location.pathname}`;
+    setLink('canonical', canonicalUrl);
+
     // Open Graph
     setMeta('og:title', fullTitle, 'property');
     setMeta('og:description', description || '', 'property');
     setMeta('og:type', ogType || 'website', 'property');
-    setMeta('og:url', window.location.href, 'property');
+    setMeta('og:url', canonicalUrl, 'property');
     if (ogImage) setMeta('og:image', ogImage, 'property');
     setMeta('og:site_name', 'LiveDetector', 'property');
     setMeta('og:locale', 'tr_TR', 'property');
@@ -84,7 +91,7 @@ export function useSEO({ title, description, noindex, ogType, ogImage, article }
       const script = document.querySelector('script[data-seo-ld]');
       if (script) script.remove();
     };
-  }, [title, description, noindex, ogType, ogImage, article]);
+  }, [title, description, noindex, canonical, ogType, ogImage, article]);
 }
 
 function setMeta(key: string, value: string, attr: 'name' | 'property' = 'name') {
@@ -96,4 +103,14 @@ function setMeta(key: string, value: string, attr: 'name' | 'property' = 'name')
     document.head.appendChild(tag);
   }
   tag.setAttribute('content', value);
+}
+
+function setLink(rel: string, href: string) {
+  let tag = document.querySelector(`link[rel="${rel}"]`) as HTMLLinkElement | null;
+  if (!tag) {
+    tag = document.createElement('link');
+    tag.setAttribute('rel', rel);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('href', href);
 }

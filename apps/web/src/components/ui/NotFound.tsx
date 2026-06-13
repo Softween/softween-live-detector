@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useSEO } from '../../hooks/useSEO';
 
 export default function NotFound() {
   const { t } = useTranslation();
+  useSEO({ title: '404', noindex: true });
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#09090b] px-4 text-center">
