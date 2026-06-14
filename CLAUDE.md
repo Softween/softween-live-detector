@@ -57,16 +57,17 @@ apps/
 ├── worker/src/
 │   ├── index.ts              # Hono app setup
 │   ├── cron/scheduled.ts     # 5-min cron handler (monitoring engine)
-│   ├── routes/               # 16 modules: auth, monitors, checks, visitor,
+│   ├── routes/               # 17 modules: auth, monitors, checks, visitor,
 │   │                         #   status-page, heartbeat, apikeys, teams, incidents,
-│   │                         #   sla, webhooks, turkey, blog, groups, tags, bulk
+│   │                         #   sla, webhooks, turkey, blog, groups, tags, bulk,
+│   │                         #   sitemap
 │   ├── services/             # 20 services: ping, notification, heartbeat, ssl,
 │   │                         #   turkey-ping, turkey-seed, turkey, trends, blog,
 │   │                         #   ai-blog, sla, cleanup, bulk-import, auth, monitor,
 │   │                         #   check, group, tag, apikey, team
 │   ├── middleware/            # CORS, auth (JWT), rate-limit
-│   ├── lib/                  # Utilities
-│   └── migrations/           # 6 SQL migration files
+│   └── lib/                  # Utilities
+├── worker/migrations/        # 6 SQL migration files (apps/worker/migrations/)
 ├── web/src/
 │   ├── App.tsx               # Router setup (20 lazy-loaded pages)
 │   ├── pages/                # Dashboard, MonitorDetail, AddMonitor, Settings,
