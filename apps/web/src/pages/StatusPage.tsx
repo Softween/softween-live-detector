@@ -46,6 +46,12 @@ export default function StatusPage() {
     }
   }
 
+  // Hooks must run on every render, before any early return (React error #310).
+  useSEO({
+    title: data ? `${data.title} - Status` : 'Status',
+    description: data?.description || (data ? `Current status of ${data.title} services` : 'Service status'),
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#09090b] flex items-center justify-center">
@@ -64,11 +70,6 @@ export default function StatusPage() {
       </div>
     );
   }
-
-  useSEO({
-    title: `${data.title} - Status`,
-    description: data.description || `Current status of ${data.title} services`,
-  });
 
   const isTr = i18n.language === 'tr';
   const statusInfo = STATUS_CONFIG[data.overall_status];
