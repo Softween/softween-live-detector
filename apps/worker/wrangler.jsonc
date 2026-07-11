@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "softween-live-checker-api",
-  "account_id": "a01ee186bf9ebcbfc2e3e21e4c948737",
+  // account_id comes from the CLOUDFLARE_ACCOUNT_ID env var (CI) or wrangler login (local)
   "main": "src/index.ts",
   "workers_dev": true,
   "compatibility_date": "2026-02-08",
@@ -22,10 +22,12 @@
   "ai": {
     "binding": "AI"
   },
-  // Gmail secrets (set via `wrangler secret put`):
+  // Secrets (set via `wrangler secret put`):
+  //   JWT_SECRET          - HMAC secret for auth tokens
   //   GMAIL_CLIENT_EMAIL  - Google service account email
   //   GMAIL_PRIVATE_KEY   - RSA private key (PEM, with \n escaped)
-  //   GMAIL_SENDER_EMAIL  - alerts@softween.com (delegated sender)
+  //   GMAIL_SENDER_EMAIL  - delegated sender address
+  //   SENTRY_DSN          - optional, leave unset to disable error reporting
   "vars": {
     "ENVIRONMENT": "production",
     "FRONTEND_URL": "https://livedetector.softween.com",

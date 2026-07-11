@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { initSentry } from './lib/sentry';
+import { MIXPANEL_TOKEN, mixpanelEnabled } from './lib/analytics';
 import App from './App';
 import './i18n';
 import './index.css';
@@ -15,7 +16,7 @@ initSentry();
 // Mixpanel is non-critical for initial render
 const initMixpanel = () => {
   import('mixpanel-browser').then(({ default: mixpanel }) => {
-    mixpanel.init('6c0eca6726c12dd30b4e4a1cdef97adc', {
+    mixpanel.init(MIXPANEL_TOKEN!, {
       debug: false,
       track_pageview: true,
       persistence: 'localStorage',
@@ -25,10 +26,12 @@ const initMixpanel = () => {
   });
 };
 
-if ('requestIdleCallback' in window) {
-  requestIdleCallback(initMixpanel);
-} else {
-  setTimeout(initMixpanel, 2000);
+if (mixpanelEnabled) {
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(initMixpanel);
+  } else {
+    setTimeout(initMixpanel, 2000);
+  }
 }
 
 createRoot(document.getElementById('root')!).render(

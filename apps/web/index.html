@@ -57,27 +57,26 @@
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" /></noscript>
 
-    <!-- Google Analytics: deferred to avoid blocking FCP/TBT -->
+    <!-- Google Analytics: deferred to avoid blocking FCP/TBT. Only active when VITE_GA_MEASUREMENT_ID is set at build time. -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-VG027K5J5X', { page_path: window.location.pathname, traffic_type: (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'internal' : undefined });
-      // Load gtag.js after page becomes interactive
-      if ('requestIdleCallback' in window) {
-        requestIdleCallback(function() {
+      var GA_ID = '%VITE_GA_MEASUREMENT_ID%';
+      if (GA_ID && GA_ID.indexOf('%') === -1) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', GA_ID, { page_path: window.location.pathname, traffic_type: (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'internal' : undefined });
+        // Load gtag.js after page becomes interactive
+        var loadGtag = function() {
           var s = document.createElement('script');
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-VG027K5J5X';
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA_ID;
           s.async = true;
           document.head.appendChild(s);
-        });
-      } else {
-        window.addEventListener('load', function() {
-          var s = document.createElement('script');
-          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-VG027K5J5X';
-          s.async = true;
-          document.head.appendChild(s);
-        });
+        };
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadGtag);
+        } else {
+          window.addEventListener('load', loadGtag);
+        }
       }
     </script>
 

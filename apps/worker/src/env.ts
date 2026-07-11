@@ -8,6 +8,8 @@ export interface Env {
   ENVIRONMENT: string;
   FRONTEND_URL: string;
   SERPAPI_KEY?: string;
+  /** Sentry ingest DSN, leave unset to disable error reporting. */
+  SENTRY_DSN?: string;
   SENTRY_RELEASE?: string;
   // Gmail REST API credentials (service account with domain-wide delegation)
   GMAIL_CLIENT_EMAIL: string;

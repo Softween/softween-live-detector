@@ -34,7 +34,7 @@ pnpm db:migrate:remote           # Apply to production D1
 - **Database**: D1 (SQLite) — `live-checker-db`
 - **KV**: Round-robin offsets, cache
 - **AI**: Cloudflare Workers AI (blog generation)
-- **Email**: Resend API
+- **Email**: Gmail REST API (service account with domain-wide delegation)
 - **Notifications**: Email + Telegram + Webhooks
 
 ### Web (`apps/web`)
@@ -106,7 +106,7 @@ HTTP (all methods), TCP, DNS, PING — with custom headers, keyword validation, 
 
 ### Notification Channels
 
-Email (Resend), Telegram, Webhooks — with 15-min cooldown, slow response detection, weekly reports.
+Email (Gmail API), Telegram, Webhooks — with 15-min cooldown, slow response detection, weekly reports.
 
 ## Cloudflare Bindings
 

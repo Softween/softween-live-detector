@@ -8,7 +8,7 @@ import type { Env } from '../env';
 
 function sentryOptions(env: Env): CloudflareOptions {
   return {
-    dsn: 'https://28abf698166f81869f531e551e0069e8@o4510972743843840.ingest.us.sentry.io/4511111058030592',
+    dsn: env.SENTRY_DSN,
     environment: env.ENVIRONMENT ?? 'development',
     release: `softween-live-detector@${env.SENTRY_RELEASE ?? 'unknown'}`,
     tracesSampleRate: 0.5,

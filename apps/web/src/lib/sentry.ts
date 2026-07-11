@@ -1,8 +1,11 @@
 import * as Sentry from '@sentry/react';
 
 export function initSentry() {
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  if (!dsn) return;
+
   Sentry.init({
-    dsn: 'https://28abf698166f81869f531e551e0069e8@o4510972743843840.ingest.us.sentry.io/4511111058030592',
+    dsn,
     environment: import.meta.env.MODE,
     release: 'softween-live-detector-web@0.0.1',
     tracesSampleRate: 0.5,

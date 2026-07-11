@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect, type ReactNode } from 'react';
 import { api } from '../api/client';
+import { mixpanelEnabled } from '../lib/analytics';
 
 interface User {
   id: string;
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function login(email: string, password: string) {
     const userData = await api.auth.login({ email, password });
     setUser(userData);
+    if (!mixpanelEnabled) return;
     import('mixpanel-browser').then(({ default: mixpanel }) => {
       mixpanel.identify(userData.id);
       mixpanel.people.set({ '$name': userData.name, '$email': userData.email });
@@ -43,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function register(email: string, password: string, name: string) {
     const userData = await api.auth.register({ email, password, name });
     setUser(userData);
+    if (!mixpanelEnabled) return;
     import('mixpanel-browser').then(({ default: mixpanel }) => {
       mixpanel.identify(userData.id);
       mixpanel.people.set({ '$name': userData.name, '$email': userData.email });
@@ -52,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function logout() {
     await api.auth.logout();
     setUser(null);
+    if (!mixpanelEnabled) return;
     import('mixpanel-browser').then(({ default: mixpanel }) => {
       mixpanel.reset();
     });
