@@ -88,7 +88,7 @@ packages/
 ### Scheduled Tasks (Cron — every 5 min)
 
 | Task | Schedule |
-|------|----------|
+| --- | --- |
 | Monitor pings (25/batch, round-robin) | Every 5 min |
 | Status change detection → incidents | Every 5 min |
 | Check results → DB | Every 5 min |
@@ -111,7 +111,7 @@ Email (Gmail API), Telegram, Webhooks — with 15-min cooldown, slow response de
 ## Cloudflare Bindings
 
 | Binding | Type | Purpose |
-|---------|------|---------|
+| --- | --- | --- |
 | `DB` | D1 | live-checker-db |
 | `KV` | KV | Round-robin offsets, cache |
 | `AI` | AI | Blog generation (Cloudflare Workers AI) |
@@ -119,14 +119,14 @@ Email (Gmail API), Telegram, Webhooks — with 15-min cooldown, slow response de
 ## CI/CD
 
 | Workflow | Trigger | Action |
-|----------|---------|--------|
+| --- | --- | --- |
 | `deploy-web.yml` | Push to main (apps/web/ or packages/shared/) | Build → deploy to Cloudflare Pages (`softween-live-checker`) |
 | `deploy-worker.yml` | Push to main (apps/worker/ or packages/shared/) | Typecheck → deploy to Cloudflare Workers |
 
 ## Key Limits
 
 | Limit | Value |
-|-------|-------|
+| --- | --- |
 | Max monitors/user | 25 |
 | Max heartbeats/user | 5 |
 | Check interval | 300s (5 min) |
