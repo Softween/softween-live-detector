@@ -11,12 +11,12 @@
   },
   "dependencies": {
     "@sentry/react": "^10.70.0",
-    "i18next": "^26.3.1",
-    "mixpanel-browser": "^2.82.0",
+    "i18next": "^26.4.0",
+    "mixpanel-browser": "^2.82.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-hot-toast": "^2.6.0",
-    "react-i18next": "^17.0.8",
+    "react-i18next": "^17.0.12",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.8.1",
     "shared": "workspace:*"
