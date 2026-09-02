@@ -11,14 +11,14 @@
     "db:migrate:remote": "wrangler d1 migrations apply live-checker-db --remote"
   },
   "dependencies": {
-    "@sentry/cloudflare": "^10.70.0",
-    "hono": "^4.13.2",
+    "@sentry/cloudflare": "^10.71.0",
+    "hono": "^4.13.5",
     "shared": "workspace:*",
     "zod": "^3.23.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20241106.0",
     "typescript": "^6.0.3",
-    "wrangler": "^4.123.0"
+    "wrangler": "^4.127.0"
   }
 }
