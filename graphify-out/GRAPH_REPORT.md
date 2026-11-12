@@ -1,11 +1,11 @@
-# Graph Report - .  (2026-07-11)
+# Graph Report - .  (2026-11-12)
 
 ## Corpus Check
-- 99 files · ~45,569 words
+- 100 files · ~46,695 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 297 nodes · 456 edges · 24 communities detected
+- 305 nodes · 467 edges · 26 communities detected
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
@@ -27,44 +27,44 @@
 ## Communities
 
 ### Community 0 - "Community 0"
-Cohesion: 0.09
-Nodes (2): initI18n(), loadResources()
-
-### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (4): handleDelete(), handleSubmit(), loadGroups(), resetForm()
-
-### Community 2 - "Community 2"
-Cohesion: 0.09
 Nodes (0): 
 
-### Community 3 - "Community 3"
+### Community 1 - "Community 1"
+Cohesion: 0.1
+Nodes (2): initI18n(), loadResources()
+
+### Community 2 - "Community 2"
 Cohesion: 0.1
 Nodes (10): handleCreate(), handleDelete(), loadKeys(), handleCreate(), handleDelete(), loadHeartbeats(), handleCreateTeam(), handleInvite() (+2 more)
 
+### Community 3 - "Community 3"
+Cohesion: 0.11
+Nodes (8): checkerFetch(), isProbeHost(), pingMonitor(), probeHeaders(), handleScheduled(), handleTurkeyChecks(), checkSSLCertificate(), checkSSLExpiry()
+
 ### Community 4 - "Community 4"
+Cohesion: 0.12
+Nodes (1): ApiError
+
+### Community 5 - "Community 5"
 Cohesion: 0.15
 Nodes (11): base64url(), buildRawMessage(), createSignedJwt(), getAccessToken(), importPrivateKey(), sendViaGmail(), sendSlowResponseNotification(), sendStatusNotification() (+3 more)
 
-### Community 5 - "Community 5"
-Cohesion: 0.14
-Nodes (1): ApiError
-
 ### Community 6 - "Community 6"
-Cohesion: 0.12
-Nodes (4): handleScheduled(), handleTurkeyChecks(), checkSSLCertificate(), checkSSLExpiry()
-
-### Community 7 - "Community 7"
 Cohesion: 0.12
 Nodes (2): handlePing(), loadData()
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.16
 Nodes (5): formatDate(), generatePerformancePost(), generateTrendPost(), generateWeeklyBlogContent(), generateWeeklyOutagePost()
 
-### Community 9 - "Community 9"
+### Community 8 - "Community 8"
 Cohesion: 0.16
 Nodes (4): bufferToHex(), hashPassword(), hexToBuffer(), verifyPassword()
+
+### Community 9 - "Community 9"
+Cohesion: 0.15
+Nodes (0): 
 
 ### Community 10 - "Community 10"
 Cohesion: 0.19
@@ -87,20 +87,20 @@ Cohesion: 0.33
 Nodes (2): createTeam(), getTeam()
 
 ### Community 15 - "Community 15"
+Cohesion: 0.53
+Nodes (4): handleDelete(), handleSubmit(), loadGroups(), resetForm()
+
+### Community 16 - "Community 16"
 Cohesion: 0.47
 Nodes (3): createApiKey(), hashKey(), validateApiKey()
 
-### Community 16 - "Community 16"
-Cohesion: 0.6
-Nodes (4): base64UrlDecode(), base64UrlEncode(), signJWT(), verifyJWT()
-
 ### Community 17 - "Community 17"
-Cohesion: 1.0
+Cohesion: 0.4
 Nodes (0): 
 
 ### Community 18 - "Community 18"
-Cohesion: 1.0
-Nodes (0): 
+Cohesion: 0.6
+Nodes (4): base64UrlDecode(), base64UrlEncode(), signJWT(), verifyJWT()
 
 ### Community 19 - "Community 19"
 Cohesion: 1.0
@@ -122,36 +122,42 @@ Nodes (0):
 Cohesion: 1.0
 Nodes (0): 
 
+### Community 24 - "Community 24"
+Cohesion: 1.0
+Nodes (0): 
+
+### Community 25 - "Community 25"
+Cohesion: 1.0
+Nodes (0): 
+
 ## Knowledge Gaps
-- **Thin community `Community 17`** (1 nodes): `validation.ts`
+- **Thin community `Community 19`** (1 nodes): `validation.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 18`** (1 nodes): `types.ts`
+- **Thin community `Community 20`** (1 nodes): `types.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 19`** (1 nodes): `constants.ts`
+- **Thin community `Community 21`** (1 nodes): `constants.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 20`** (1 nodes): `tailwind.config.js`
+- **Thin community `Community 22`** (1 nodes): `tailwind.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 21`** (1 nodes): `vite.config.ts`
+- **Thin community `Community 23`** (1 nodes): `vite.config.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 22`** (1 nodes): `postcss.config.js`
+- **Thin community `Community 24`** (1 nodes): `postcss.config.js`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
-- **Thin community `Community 23`** (1 nodes): `vite-env.d.ts`
+- **Thin community `Community 25`** (1 nodes): `vite-env.d.ts`
   Too small to be a meaningful cluster - may be noise or needs more connections extracted.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
-- **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
-- **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.09 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
+- **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.1 - nodes in this community are weakly interconnected._
-- **Should `Community 5` be split into smaller, more focused modules?**
-  _Cohesion score 0.14 - nodes in this community are weakly interconnected._
-- **Should `Community 6` be split into smaller, more focused modules?**
+- **Should `Community 2` be split into smaller, more focused modules?**
+  _Cohesion score 0.1 - nodes in this community are weakly interconnected._
+- **Should `Community 3` be split into smaller, more focused modules?**
+  _Cohesion score 0.11 - nodes in this community are weakly interconnected._
+- **Should `Community 4` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
-- **Should `Community 7` be split into smaller, more focused modules?**
+- **Should `Community 6` be split into smaller, more focused modules?**
   _Cohesion score 0.12 - nodes in this community are weakly interconnected._
