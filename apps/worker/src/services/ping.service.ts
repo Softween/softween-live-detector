@@ -22,7 +22,60 @@ interface MonitorRow {
   port: number | null;
 }
 
-export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
+interface CheckerInit {
+  method: string;
+  signal: AbortSignal;
+  headers: Record<string, string>;
+  redirect?: string;
+}
+
+// glossgo's WAF lets the checker past bot protection on partner and admin only when this header
+// carries the shared secret (Worker secret SRE_PROBE_HEADER_SECRET). It goes to exactly these hosts,
+// decided per redirect hop, so it never follows a redirect elsewhere (admin redirects to Cloudflare Access).
+const PROBE_HEADER = 'X-SRE-Probe';
+const PROBE_HEADER_HOSTS: ReadonlySet<string> = new Set(['partner.glossgo.com', 'admin.glossgo.com']);
+const MAX_REDIRECTS = 5;
+const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308]);
+
+function isProbeHost(url: string): boolean {
+  try {
+    return PROBE_HEADER_HOSTS.has(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+export function probeHeaders(url: string, secret: string | undefined): Record<string, string> {
+  return secret && isProbeHost(url) ? { [PROBE_HEADER]: secret } : {};
+}
+
+// Every other host keeps the plain fetch. With the probe header, redirects are followed by hand so the
+// header is decided again from each hop's own URL.
+async function checkerFetch(url: string, init: CheckerInit, probeSecret: string | undefined): Promise<Response> {
+  if (!probeSecret || !isProbeHost(url)) return fetch(url, init);
+  let current = url;
+  let method = init.method;
+  for (let hop = 0; ; hop++) {
+    const response = await fetch(current, {
+      ...init,
+      method,
+      headers: { ...init.headers, ...probeHeaders(current, probeSecret) },
+      redirect: 'manual',
+    });
+    const location = response.headers.get('location');
+    if (!REDIRECT_STATUSES.has(response.status) || location === null) return response;
+    if (hop === MAX_REDIRECTS) throw new Error('Too many redirects');
+    response.body?.cancel().catch(() => {});
+    // Same rule as fetch's own redirect handling: a 303, or a 301/302 after a POST, continues as a GET.
+    const toGet =
+      (response.status === 303 && method !== 'HEAD') ||
+      ((response.status === 301 || response.status === 302) && method === 'POST');
+    if (toGet) method = 'GET';
+    current = new URL(location, current).toString();
+  }
+}
+
+export async function pingMonitor(monitor: MonitorRow, probeSecret?: string): Promise<PingResult> {
   const id = crypto.randomUUID();
   const startTime = Date.now();
 
@@ -45,11 +98,11 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
       }
 
       try {
-        const tcpResponse = await fetch(tcpUrl, {
+        const tcpResponse = await checkerFetch(tcpUrl, {
           method: 'HEAD',
           signal: controller.signal,
           headers: { 'User-Agent': 'SoftweenLiveChecker/1.0', ...extraHeaders },
-        });
+        }, probeSecret);
         clearTimeout(timeoutId);
         const responseTime = Date.now() - startTime;
 
@@ -83,7 +136,7 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), monitor.timeout_ms || 10000);
 
-    const response = await fetch(monitor.url, {
+    const response = await checkerFetch(monitor.url, {
       method: monitor.method || 'GET',
       signal: controller.signal,
       headers: {
@@ -91,7 +144,7 @@ export async function pingMonitor(monitor: MonitorRow): Promise<PingResult> {
         ...extraHeaders,
       },
       redirect: 'follow',
-    });
+    }, probeSecret);
 
     clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;

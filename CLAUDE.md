@@ -121,7 +121,7 @@ Email (Gmail API), Telegram, Webhooks — with 15-min cooldown, slow response de
 | Workflow | Trigger | Action |
 | --- | --- | --- |
 | `deploy-web.yml` | Push to main (apps/web/ or packages/shared/) | Build → deploy to Cloudflare Pages (`softween-live-checker`) |
-| `deploy-worker.yml` | Push to main (apps/worker/ or packages/shared/) | Typecheck → deploy to Cloudflare Workers |
+| `deploy-worker.yml` | Push to main (apps/worker/ or packages/shared/) | Typecheck → unit tests → deploy to Cloudflare Workers |
 
 ## Key Limits
 
@@ -141,7 +141,7 @@ Email (Gmail API), Telegram, Webhooks — with 15-min cooldown, slow response de
 - **pnpm required** — `pnpm-workspace.yaml` defines workspace
 - Internal name is "live-checker", marketing name is "livedetector"
 - Node >=20, pnpm v9
-- No test framework configured
+- Worker unit tests: Node's built-in test runner with its TypeScript stripping, no extra deps (`pnpm --filter worker test`, `apps/worker/test/`, Node >=22.18); `deploy-worker.yml` runs them before deploy
 - No staging environment — main branch is production
 - D1 migrations must be applied manually (local and remote separately)
 - Worker uses `wrangler.jsonc` (JSON with comments)

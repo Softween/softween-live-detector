@@ -65,7 +65,9 @@ export async function handleScheduled(
   if (batch.length === 0) return;
 
   // 3. Ping all monitors in parallel
-  const results = await Promise.all(batch.map((monitor) => pingMonitor(monitor)));
+  const results = await Promise.all(
+    batch.map((monitor) => pingMonitor(monitor, env.SRE_PROBE_HEADER_SECRET)),
+  );
 
   // 4. Batch insert check results
   const insertStatements = results.map((result) =>

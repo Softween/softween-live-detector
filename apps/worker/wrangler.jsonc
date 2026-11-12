@@ -28,6 +28,7 @@
   //   GMAIL_PRIVATE_KEY   - RSA private key (PEM, with \n escaped)
   //   GMAIL_SENDER_EMAIL  - delegated sender address
   //   SENTRY_DSN          - optional, leave unset to disable error reporting
+  //   SRE_PROBE_HEADER_SECRET - optional, X-SRE-Probe value for checks on partner/admin.glossgo.com
   "vars": {
     "ENVIRONMENT": "production",
     "FRONTEND_URL": "https://livedetector.softween.com",

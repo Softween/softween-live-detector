@@ -21,6 +21,7 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter worker typecheck
+      - run: pnpm --filter worker test
       - name: Deploy to Cloudflare Workers
         run: pnpm --filter worker run deploy
         env:

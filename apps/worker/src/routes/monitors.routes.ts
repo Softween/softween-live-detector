@@ -133,7 +133,7 @@ monitors.post('/:id/ping', async (c) => {
     custom_headers: monitor.custom_headers,
     monitor_type: monitor.monitor_type,
     port: monitor.port,
-  });
+  }, c.env.SRE_PROBE_HEADER_SECRET);
 
   // Save the check result
   await c.env.DB.prepare(
