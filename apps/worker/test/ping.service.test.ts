@@ -1,7 +1,9 @@
 // Runs on Node's built-in test runner with its TypeScript type stripping: `pnpm --filter worker test`.
 import assert from 'node:assert/strict';
 import { afterEach, describe, it } from 'node:test';
-import { pingMonitor, probeHeaders } from '../src/services/ping.service.ts';
+import { PROBE_MONITOR_IDS, pingMonitor, probeHeaders } from '../src/services/ping.service.ts';
+
+const [OWN_MONITOR] = PROBE_MONITOR_IDS;
 
 type Monitor = Parameters<typeof pingMonitor>[0];
 type Result = Awaited<ReturnType<typeof pingMonitor>>;
@@ -35,7 +37,7 @@ function stubFetch(route: (url: URL) => Response): Hop[] {
 
 function monitor(url: string, overrides: Partial<Monitor> = {}): Monitor {
   return {
-    id: 'm1',
+    id: OWN_MONITOR,
     url,
     method: 'GET',
     expected_status: 200,
@@ -119,6 +121,13 @@ describe('pingMonitor probe header', () => {
       { url: 'https://partner.glossgo.com/', method: 'HEAD', probe: 'test-secret', custom: 'kept', redirect: 'manual' },
     ]);
     assert.deepEqual(outcome(result), { status: 'up', statusCode: 200, error: null });
+  });
+
+  it('never gives the header to another user\'s monitor on partner or admin', async () => {
+    const hops = stubFetch(() => new Response('ok'));
+    await pingMonitor(monitor('https://partner.glossgo.com/claim', { id: 'someone-else' }), 'test-secret');
+    await pingMonitor(monitor('https://admin.glossgo.com/', { id: 'someone-else' }), 'test-secret');
+    assert.deepEqual(hops.map((h) => h.probe), [null, null]);
   });
 
   it('leaves other hosts, and a missing secret, on the plain fetch', async () => {

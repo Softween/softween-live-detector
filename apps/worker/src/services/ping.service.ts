@@ -75,7 +75,12 @@ async function checkerFetch(url: string, init: CheckerInit, probeSecret: string 
   }
 }
 
+// livedetector is a public platform: a user's monitor on partner or admin must not carry the secret, or it
+// would skip glossgo.com's bot, anti-scraper and anti-farm rules. Only glossgo's own partner monitor gets it.
+export const PROBE_MONITOR_IDS: ReadonlySet<string> = new Set(['cc47cfbe-daa9-471e-a36e-2a0be1b3dcc9']);
+
 export async function pingMonitor(monitor: MonitorRow, probeSecret?: string): Promise<PingResult> {
+  const secret = PROBE_MONITOR_IDS.has(monitor.id) ? probeSecret : undefined;
   const id = crypto.randomUUID();
   const startTime = Date.now();
 
@@ -102,7 +107,7 @@ export async function pingMonitor(monitor: MonitorRow, probeSecret?: string): Pr
           method: 'HEAD',
           signal: controller.signal,
           headers: { 'User-Agent': 'SoftweenLiveChecker/1.0', ...extraHeaders },
-        }, probeSecret);
+        }, secret);
         clearTimeout(timeoutId);
         const responseTime = Date.now() - startTime;
 
@@ -144,7 +149,7 @@ export async function pingMonitor(monitor: MonitorRow, probeSecret?: string): Pr
         ...extraHeaders,
       },
       redirect: 'follow',
-    }, probeSecret);
+    }, secret);
 
     clearTimeout(timeoutId);
     const responseTime = Date.now() - startTime;
