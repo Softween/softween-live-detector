@@ -34,7 +34,7 @@ auth.post('/register', async (c) => {
   const parsed = registerSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   try {
@@ -126,7 +126,7 @@ auth.post('/forgot-password', async (c) => {
   const parsed = forgotPasswordSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   // Always return success to prevent email enumeration
@@ -151,7 +151,7 @@ auth.post('/reset-password', async (c) => {
   const parsed = resetPasswordSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const success = await resetPasswordWithToken(c.env, parsed.data.token, parsed.data.password);
@@ -225,7 +225,7 @@ auth.put('/password', authMiddleware, async (c) => {
   const parsed = changePasswordSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const userId = c.get('userId');
@@ -243,7 +243,7 @@ auth.delete('/account', authMiddleware, async (c) => {
   const parsed = deleteAccountSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const userId = c.get('userId');
@@ -289,7 +289,7 @@ auth.put('/notifications', authMiddleware, async (c) => {
   const parsed = updateNotificationSettingsSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const userId = c.get('userId');

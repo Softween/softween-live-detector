@@ -42,7 +42,7 @@ incidents.get('/:monitorId', authMiddleware, async (c) => {
 incidents.post('/:incidentId/updates', authMiddleware, async (c) => {
   const body = await c.req.json();
   const parsed = incidentUpdateSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: parsed.error.errors[0].message }, 400);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0].message }, 400);
 
   const userId = c.get('userId');
   const incidentId = c.req.param('incidentId');

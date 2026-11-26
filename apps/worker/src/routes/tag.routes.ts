@@ -26,7 +26,7 @@ tags.post('/', async (c) => {
   const parsed = createTagSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   try {
@@ -58,7 +58,7 @@ tags.put('/monitors/:monitorId', async (c) => {
   const parsed = setMonitorTagsSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   // Verify monitor belongs to user

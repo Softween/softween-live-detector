@@ -271,7 +271,7 @@ statusPage.put('/mine', async (c) => {
   const parsed = updateStatusPageSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const { slug, title, description, is_public, monitor_ids } = parsed.data;

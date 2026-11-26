@@ -31,7 +31,7 @@ groups.post('/', async (c) => {
   const parsed = createGroupSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   try {
@@ -50,7 +50,7 @@ groups.put('/:id', async (c) => {
   const parsed = updateGroupSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const group = await updateGroup(c.env, groupId, userId, parsed.data);
