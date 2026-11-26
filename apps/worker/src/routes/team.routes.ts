@@ -23,7 +23,7 @@ teams.get('/', authMiddleware, async (c) => {
 teams.post('/', authMiddleware, async (c) => {
   const body = await c.req.json();
   const parsed = createTeamSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: parsed.error.errors[0].message }, 400);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0].message }, 400);
 
   try {
     const userId = c.get('userId');
@@ -38,7 +38,7 @@ teams.post('/', authMiddleware, async (c) => {
 teams.post('/invite', authMiddleware, async (c) => {
   const body = await c.req.json();
   const parsed = inviteTeamMemberSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: parsed.error.errors[0].message }, 400);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0].message }, 400);
 
   const userId = c.get('userId');
   const team = await getTeam(c.env, userId);

@@ -34,7 +34,7 @@ monitors.post('/', async (c) => {
   const parsed = createMonitorSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   try {
@@ -65,7 +65,7 @@ monitors.put('/:id', async (c) => {
   const parsed = updateMonitorSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const monitor = await updateMonitor(c.env, monitorId, userId, parsed.data);

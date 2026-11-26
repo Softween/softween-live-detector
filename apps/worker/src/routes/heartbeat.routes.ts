@@ -36,7 +36,7 @@ heartbeat.get('/', authMiddleware, async (c) => {
 heartbeat.post('/', authMiddleware, async (c) => {
   const body = await c.req.json();
   const parsed = createHeartbeatSchema.safeParse(body);
-  if (!parsed.success) return c.json({ error: parsed.error.errors[0].message }, 400);
+  if (!parsed.success) return c.json({ error: parsed.error.issues[0].message }, 400);
 
   try {
     const userId = c.get('userId');

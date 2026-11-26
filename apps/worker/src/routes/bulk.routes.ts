@@ -32,7 +32,7 @@ bulk.post('/urls', async (c) => {
   const parsed = bulkImportUrlsSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const result = await bulkCreateFromUrls(c.env, userId, parsed.data.urls, {
@@ -52,7 +52,7 @@ bulk.post('/sitemap', async (c) => {
   const parsed = bulkImportSitemapSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   try {
@@ -71,7 +71,7 @@ bulk.post('/path-builder', async (c) => {
   const parsed = bulkImportPathBuilderSchema.safeParse(body);
 
   if (!parsed.success) {
-    return c.json({ error: parsed.error.errors[0].message }, 400);
+    return c.json({ error: parsed.error.issues[0].message }, 400);
   }
 
   const result = await bulkCreateFromPathBuilder(
