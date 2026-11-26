@@ -38,7 +38,7 @@ pnpm db:migrate:remote           # Apply to production D1
 - **Notifications**: Email + Telegram + Webhooks
 
 ### Web (`apps/web`)
-- **Build**: Vite 6 + React 19 + TypeScript
+- **Build**: Vite 7 + React 19 + TypeScript
 - **Routing**: React Router 7
 - **Styling**: Tailwind CSS + shadcn/ui
 - **State**: React Hook Form + context-based auth
