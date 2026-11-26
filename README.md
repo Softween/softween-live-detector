@@ -21,7 +21,7 @@ packages/
 ## Tech Stack
 
 - **Worker**: Cloudflare Workers (`nodejs_compat`), Hono v4, D1 (SQLite), KV, Workers AI (blog generation), Gmail API (email)
-- **Web**: Vite 6 + React 19 + TypeScript, React Router 7, Tailwind + shadcn/ui, Recharts, react-i18next (TR/EN), Mixpanel
+- **Web**: Vite 7 + React 19 + TypeScript, React Router 7, Tailwind + shadcn/ui, Recharts, react-i18next (TR/EN), Mixpanel
 - **Shared**: workspace package with types, constants, Zod validation schemas
 
 ## Quick Start
